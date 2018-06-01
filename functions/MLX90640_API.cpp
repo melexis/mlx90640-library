@@ -90,7 +90,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     
     error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
     frameData[832] = controlRegister1;
-    frameData[833] = statusRegister & 0x0007;
+    frameData[833] = statusRegister & 0x0001;
     
     if(error != 0)
     {
@@ -281,8 +281,9 @@ void MLX90640_CalculateTo(uint16_t *frameData, paramsMLX90640 *params, float emi
     float To;
     float alphaCorrR[4];
     int8_t range;
+    uint16_t subPage;
     
-    
+    subPage = frameData[833];
     vdd = MLX90640_GetVdd(frameData, params);
     ta = MLX90640_GetTa(frameData, params);
     ta4 = pow((ta + 273.15), (double)4);
@@ -339,7 +340,7 @@ void MLX90640_CalculateTo(uint16_t *frameData, paramsMLX90640 *params, float emi
         else 
         {
           pattern = chessPattern; 
-        }
+        }               
         
         if(pattern == frameData[833])
         {    
@@ -358,9 +359,9 @@ void MLX90640_CalculateTo(uint16_t *frameData, paramsMLX90640 *params, float emi
             
             irData = irData / emissivity;
     
-            irData = irData - params->tgc * ((1-pattern) * irDataCP[0] + pattern * irDataCP[1]);
+            irData = irData - params->tgc * irDataCP[subPage];
             
-            alphaCompensated = (params->alpha[pixelNumber] - params->tgc * ((1-pattern) * params->cpAlpha[0] + pattern * params->cpAlpha[1])) * (1 + params->KsTa * (ta - 25));
+            alphaCompensated = (params->alpha[pixelNumber] - params->tgc * params->cpAlpha[subPage])*(1 + params->KsTa * (ta - 25));
             
             Sx = pow((double)alphaCompensated, (double)3) * (irData + alphaCompensated * taTr);
             Sx = sqrt(sqrt(Sx)) * params->ksTo[1];
@@ -407,7 +408,9 @@ void MLX90640_GetImage(uint16_t *frameData, paramsMLX90640 *params, float *resul
     int8_t pattern;
     int8_t conversionPattern;
     float image;
+    uint16_t subPage;
     
+    subPage = frameData[833];
     vdd = MLX90640_GetVdd(frameData, params);
     ta = MLX90640_GetTa(frameData, params);
     
@@ -473,9 +476,9 @@ void MLX90640_GetImage(uint16_t *frameData, paramsMLX90640 *params, float *resul
               irData = irData + params->ilChessC[2] * (2 * ilPattern - 1) - params->ilChessC[1] * conversionPattern; 
             }
             
-            irData = irData - params->tgc * ((1-pattern) * irDataCP[0] + pattern * irDataCP[1]);
+            irData = irData - params->tgc * irDataCP[subPage];
             
-            alphaCompensated = (params->alpha[pixelNumber] - params->tgc * ((1-pattern) * params->cpAlpha[0] + pattern * params->cpAlpha[1]));
+            alphaCompensated = (params->alpha[pixelNumber] - params->tgc * params->cpAlpha[subPage])*(1 + params->KsTa * (ta - 25));
             
             image = irData/alphaCompensated;
             
@@ -490,7 +493,7 @@ float MLX90640_GetVdd(uint16_t *frameData, paramsMLX90640 *params)
 {
     float vdd;
     float resolutionCorrection;
-    //int resolution;
+
     int resolutionRAM;    
     
     vdd = frameData[810];
@@ -572,7 +575,7 @@ void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     float KvPTAT;
     float KtPTAT;
     int16_t vPTAT25;
-    int16_t alphaPTAT;
+    float alphaPTAT;
     
     KvPTAT = (eeData[50] & 0xFC00) >> 10;
     if(KvPTAT > 31)
@@ -590,7 +593,7 @@ void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     
     vPTAT25 = eeData[49];
     
-    alphaPTAT = ((eeData[16] & 0xF000) >> 14) + 8;
+    alphaPTAT = (eeData[16] & 0xF000) / pow(2, (double)14) + 8.0f;
     
     mlx90640->KvPTAT = KvPTAT;
     mlx90640->KtPTAT = KtPTAT;    
