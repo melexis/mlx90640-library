@@ -24,7 +24,7 @@
         float KvPTAT;
         float KtPTAT;
         uint16_t vPTAT25;
-        uint16_t alphaPTAT;
+        float alphaPTAT;
         int16_t gainEE;
         float tgc;
         float cpKv;
