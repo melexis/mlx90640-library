@@ -17,8 +17,6 @@
 #include "mbed.h"
 #include "MLX90640_I2C_Driver.h"
 
-
-//int * I2CReadMLX90640(int,int,int);
 I2C i2c(p9, p10);
 
 void MLX90640_I2CInit()
@@ -26,7 +24,7 @@ void MLX90640_I2CInit()
     i2c.stop();
 }
 
-int MLX90640_I2CRead(uint8_t slaveAddr,unsigned int startAddress,unsigned int nWordsRead, uint16_t *data)
+int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
 {
     uint8_t sa;                           
     int ack = 0;                               
@@ -51,7 +49,7 @@ int MLX90640_I2CRead(uint8_t slaveAddr,unsigned int startAddress,unsigned int nW
     }
              
     sa = sa | 0x01;
-    ack = i2c.read(sa, i2cData, 2*nWordsRead, 0);
+    ack = i2c.read(sa, i2cData, 2*nMemAddressRead, 0);
     
     if (ack != 0x00)
     {
@@ -59,7 +57,7 @@ int MLX90640_I2CRead(uint8_t slaveAddr,unsigned int startAddress,unsigned int nW
     }          
     i2c.stop();   
     
-    for(cnt=0; cnt < nWordsRead; cnt++)
+    for(cnt=0; cnt < nMemAddressRead; cnt++)
     {
         i = cnt << 1;
         *p++ = (uint16_t)i2cData[i]*256 + (uint16_t)i2cData[i+1];
@@ -73,7 +71,7 @@ void MLX90640_I2CFreqSet(int freq)
     i2c.frequency(1000*freq);
 }
 
-int MLX90640_I2CWrite(uint8_t slaveAddr, unsigned int writeAddress, uint16_t data)
+int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
 {
     uint8_t sa;
     int ack = 0;
