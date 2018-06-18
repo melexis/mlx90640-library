@@ -261,7 +261,7 @@ int MLX90640_GetCurMode(uint8_t slaveAddr)
 
 //------------------------------------------------------------------------------
 
-void MLX90640_CalculateTo(uint16_t *frameData, paramsMLX90640 *params, float emissivity, float tr, float *result)
+void MLX90640_CalculateTo(uint16_t *frameData, const paramsMLX90640 *params, float emissivity, float tr, float *result)
 {
     float vdd;
     float ta;
@@ -329,9 +329,9 @@ void MLX90640_CalculateTo(uint16_t *frameData, paramsMLX90640 *params, float emi
 
     for( int pixelNumber = 0; pixelNumber < 768; pixelNumber++)
     {
-        ilPattern = int((pixelNumber) / 32) - int(int((pixelNumber) / 32) / 2) * 2; 
-        chessPattern = ilPattern ^ (pixelNumber - int(pixelNumber/2)*2); 
-        conversionPattern = (int((pixelNumber - 2) / 4) - int((pixelNumber - 1) / 4) + int((pixelNumber + 1) / 4) - int((pixelNumber) / 4)) * (1 - 2 * ilPattern);
+        ilPattern = pixelNumber / 32 - (pixelNumber / 64) * 2; 
+        chessPattern = ilPattern ^ (pixelNumber - (pixelNumber/2)*2); 
+        conversionPattern = ((pixelNumber + 2) / 4 - (pixelNumber + 3) / 4 + (pixelNumber + 1) / 4 - pixelNumber / 4) * (1 - 2 * ilPattern);
         
         if(mode == 0)
         {
@@ -448,9 +448,9 @@ void MLX90640_GetImage(uint16_t *frameData, paramsMLX90640 *params, float *resul
 
     for( int pixelNumber = 0; pixelNumber < 768; pixelNumber++)
     {
-        ilPattern = int((pixelNumber) / 32) - int(int((pixelNumber) / 32) / 2) * 2; 
-        chessPattern = ilPattern ^ (pixelNumber - int(pixelNumber/2)*2); 
-        conversionPattern = (int((pixelNumber - 2) / 4) - int((pixelNumber - 1) / 4) + int((pixelNumber + 1) / 4) - int((pixelNumber) / 4)) * (1 - 2 * ilPattern);
+        ilPattern = pixelNumber / 32 - (pixelNumber / 64) * 2; 
+        chessPattern = ilPattern ^ (pixelNumber - (pixelNumber/2)*2); 
+        conversionPattern = ((pixelNumber + 2) / 4 - (pixelNumber + 3) / 4 + (pixelNumber + 1) / 4 - pixelNumber / 4) * (1 - 2 * ilPattern);
         
         if(mode == 0)
         {
@@ -489,7 +489,7 @@ void MLX90640_GetImage(uint16_t *frameData, paramsMLX90640 *params, float *resul
 
 //------------------------------------------------------------------------------
 
-float MLX90640_GetVdd(uint16_t *frameData, paramsMLX90640 *params)
+float MLX90640_GetVdd(uint16_t *frameData, const paramsMLX90640 *params)
 {
     float vdd;
     float resolutionCorrection;
@@ -510,7 +510,7 @@ float MLX90640_GetVdd(uint16_t *frameData, paramsMLX90640 *params)
 
 //------------------------------------------------------------------------------
 
-float MLX90640_GetTa(uint16_t *frameData, paramsMLX90640 *params)
+float MLX90640_GetTa(uint16_t *frameData, const paramsMLX90640 *params)
 {
     float ptat;
     float ptatArt;
@@ -885,7 +885,7 @@ void ExtractKtaPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
         for(int j = 0; j < 32; j ++)
         {
             p = 32 * i +j;
-            split = 2*(int(p/32) - int(int(p/32)/2)*2) + p%2;
+            split = 2*(p/32 - (p/64)*2) + p%2;
             mlx90640->kta[p] = (eeData[64 + p] & 0x000E) >> 1;
             if (mlx90640->kta[p] > 3)
             {
@@ -947,7 +947,7 @@ void ExtractKvPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
         for(int j = 0; j < 32; j ++)
         {
             p = 32 * i +j;
-            split = 2*(int(p/32) - int(int(p/32)/2)*2) + p%2;
+            split = 2*(p/32 - (p/64)*2) + p%2;
             mlx90640->kv[p] = KvT[split];
             mlx90640->kv[p] = mlx90640->kv[p] / pow(2,(double)kvScale);
         }
