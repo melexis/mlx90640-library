@@ -394,7 +394,7 @@ void MLX90640_CalculateTo(uint16_t *frameData, const paramsMLX90640 *params, flo
 
 //------------------------------------------------------------------------------
 
-void MLX90640_GetImage(uint16_t *frameData, paramsMLX90640 *params, float *result)
+void MLX90640_GetImage(uint16_t *frameData, const paramsMLX90640 *params, float *result)
 {
     float vdd;
     float ta;
