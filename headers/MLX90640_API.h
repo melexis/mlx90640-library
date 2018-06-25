@@ -54,9 +54,12 @@
     void MLX90640_CalculateTo(uint16_t *frameData, const paramsMLX90640 *params, float emissivity, float tr, float *result);
     int MLX90640_SetResolution(uint8_t slaveAddr, uint8_t resolution);
     int MLX90640_GetCurResolution(uint8_t slaveAddr);
-    int MLX90640_SetRefreshRate(uint8_t slaveAddr, uint8_t refreshRate);   
-    int MLX90640_GetRefreshRate(uint8_t slaveAddr);  
+    int MLX90640_SetRefreshRate(uint8_t slaveAddr, uint8_t refreshRate);
+    int MLX90640_GetRefreshRate(uint8_t slaveAddr);
+    int MLX90640_SetSubPage(uint8_t slaveAddr, uint8_t subPage);
+    int MLX90640_SetSubPageRepeat(uint8_t slaveAddr, uint8_t subPageRepeat);
     int MLX90640_GetSubPageNumber(uint16_t *frameData);
+    int MLX90640_SetDeviceMode(uint8_t slaveAddr, uint8_t deviceMode);
     int MLX90640_GetCurMode(uint8_t slaveAddr); 
     int MLX90640_SetInterleavedMode(uint8_t slaveAddr);
     int MLX90640_SetChessMode(uint8_t slaveAddr);
