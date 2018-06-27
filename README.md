@@ -25,6 +25,20 @@ sudo ./fbuf
 
 This example uses direct-to-framebuffer rendering and black-blue-green-yellow-red-purple-white false colouring.
 
+If you gave issues with the output image, set "`IMAGE_SCALE`" to a smaller number.
+
+# interp
+
+```
+sudo ./interp
+```
+
+This example uses direct-to-framebuffer rendering and black-blue-green-yellow-red-purple-white false colouring.
+
+It also has 2x bicubic resize filter.
+
+If you have issues with the output image, set "`IMAGE_SCALE`" to a smaller number.
+
 # test
 
 
@@ -33,6 +47,8 @@ sudo ./test
 ```
 
 This example draws out to the console using ANSI colours and the full block char.
+
+To see the actual temperature values, change "`FMT_STRING`" from the block char to the float format.
 
 # step
 
