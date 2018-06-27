@@ -44,7 +44,12 @@
         uint16_t brokenPixels[5];
         uint16_t outlierPixels[5];  
     } paramsMLX90640;
-    
+   
+
+    int MLX90640_CheckInterrupt(uint8_t slaveAddr);
+    void MLX90640_StartMeasurement(uint8_t slaveAddr, uint8_t subPage);
+    int MLX90640_GetData(uint8_t slaveAddr, uint16_t *frameData);
+
     int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
     int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
     int MLX90640_ExtractParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);

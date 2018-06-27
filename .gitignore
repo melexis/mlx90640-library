@@ -1,0 +1,7 @@
+*.swp
+*.o
+*.a
+*.so
+fbuf
+step
+test

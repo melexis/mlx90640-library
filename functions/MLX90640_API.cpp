@@ -17,6 +17,7 @@
 #include <MLX90640_I2C_Driver.h>
 #include <MLX90640_API.h>
 #include <math.h>
+#include <stdio.h>
 
 void ExtractVDDParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
 void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
@@ -39,6 +40,47 @@ int CheckEEPROMValid(uint16_t *eeData);
 int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
 {
      return MLX90640_I2CRead(slaveAddr, 0x2400, 832, eeData);
+}
+
+int MLX90640_CheckInterrupt(uint8_t slaveAddr)
+{
+    uint16_t statusRegister;
+    MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
+    return (statusRegister & 0b1000) > 0;
+}
+
+void MLX90640_StartMeasurement(uint8_t slaveAddr, uint8_t subPage)
+{
+    uint16_t controlRegister1;
+    uint16_t statusRegister;
+    MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
+    controlRegister1 &= 0b1111111111101111;
+    controlRegister1 |= subPage << 4;
+    MLX90640_I2CWrite(slaveAddr, 0x800D, controlRegister1);
+    MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
+    statusRegister &= 0b1111111111110111; // Clear b3: new data available in RAM
+    statusRegister |= 0b0000000000110000; // Set b5: start of measurement
+                                          // Set b4: enable RAM overwrite
+    MLX90640_I2CWrite(slaveAddr, 0x8000, statusRegister);
+}
+
+int MLX90640_GetData(uint8_t slaveAddr, uint16_t *frameData)
+{
+    int error = 0;
+    uint16_t statusRegister;
+    uint16_t controlRegister1;
+
+    // Get page data
+    error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData);
+    
+    // Get status reguster
+    MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
+
+    // Get control register
+    MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
+    
+    frameData[832] = controlRegister1;
+    frameData[833] = statusRegister & 0x0001; // Populate the subpage number 
 }
 
 int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
@@ -71,6 +113,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
         error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
         if(error != 0)
         {
+	    printf("frameData read error \n");
             return error;
         }
                    
@@ -85,9 +128,10 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     
     if(cnt > 4)
     {
+	printf("cnt > 4 error \n");
         return -8;
     }    
-    
+    //printf("count: %d \n", cnt); 
     error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
     frameData[832] = controlRegister1;
     frameData[833] = statusRegister & 0x0001;
