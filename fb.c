@@ -67,8 +67,20 @@ void put_pixel_RGB565(int x, int y, int r, int g, int b)
 
 }
 
+void put_pixel_RGB32(int x, int y, int r, int g, int b)
+{
+    unsigned int pix_offset = x * 4 + y * finfo.line_length;
+
+    *((char*)(fbp + pix_offset)) = b;
+    *((char*)(fbp + pix_offset + 1)) = g;
+    *((char*)(fbp + pix_offset + 2)) = r;
+}
+
 void fb_put_pixel(int x, int y, int r, int g, int b) {
-    if (vinfo.bits_per_pixel == 16) {
+    if (vinfo.bits_per_pixel == 32) {
+        put_pixel_RGB32(x, y, r, g, b);
+    }
+    else if (vinfo.bits_per_pixel == 16) {
         put_pixel_RGB565(x, y, r, g, b);
     }
     else {
