@@ -25,6 +25,7 @@
 #define OFFSET_MICROS 850
 
 void put_pixel_false_colour(int x, int y, double v) {
+	// Heatmap code borrowed from: http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients
 	const int NUM_COLORS = 7;
 	static float color[NUM_COLORS][3] = { {0,0,0}, {0,0,1}, {0,1,0}, {1,1,0}, {1,0,0}, {1,0,1}, {1,1,1} };
 	int idx1, idx2;
