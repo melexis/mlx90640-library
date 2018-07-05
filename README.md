@@ -16,7 +16,13 @@ make
 sudo make install
 ```
 
-Then just "make" and "sudo ./test" or one of the other examples listed below:
+To install dependencies:
+
+```text
+sudo apt-get install libavutil-dev libavcodec-dev libavformat-dev
+```
+
+Then just `make` and `sudo ./test` or one of the other examples listed below:
 
 # fbuf
 
