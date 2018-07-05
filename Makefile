@@ -1,4 +1,6 @@
-all: test step fbuf interp video
+all: examples
+
+examples: test step fbuf interp video
 
 libMLX90640_API.so: functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o
 	$(CXX) -fPIC -shared $^ -o $@ -lbcm2835
@@ -9,22 +11,28 @@ libMLX90640_API.a: functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o
 
 functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o : CXXFLAGS+=-fPIC -I headers -shared -lbcm2835
 
-test: test.o libMLX90640_API.a
+test.o step.o fbuf.o interp.o video.o : CXXFLAGS+=-std=c++11
+
+test step fbuf interp video : CXXFLAGS+=-I.
+
+test: examples/test.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ -lbcm2835
 
-step: step.o libMLX90640_API.a
+step: examples/step.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ -lbcm2835
 
-fbuf: fbuf.o fb.o libMLX90640_API.a
+fbuf: examples/fbuf.o examples/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ -lbcm2835
 
-interp: interp.o interpolate.o fb.o libMLX90640_API.a
+interp: examples/interp.o examples/interpolate.o examples/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ -lbcm2835
 
-video: video.o fb.o libMLX90640_API.a
+video: examples/video.o examples/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ -lbcm2835 -lavcodec -lavutil -lavformat
 
 clean:
+	rm -f test step fbuf interp video
+	rm -f examples/*.o
 	rm -f *.o
 	rm -f *.so
 	rm -f test
