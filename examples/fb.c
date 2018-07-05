@@ -77,6 +77,8 @@ void put_pixel_RGB32(int x, int y, int r, int g, int b)
 }
 
 void fb_put_pixel(int x, int y, int r, int g, int b) {
+    if (x > vinfo.xres) return;
+    if (y > vinfo.yres) return;
     if (vinfo.bits_per_pixel == 32) {
         put_pixel_RGB32(x, y, r, g, b);
     }
