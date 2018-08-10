@@ -43,6 +43,15 @@ class sdist_ext_first(sdist):
         self.run_command("build_ext")
         return sdist.run(self)
 
+classifiers = ['Development Status :: 4 - Beta',
+               'Operating System :: POSIX :: Linux',
+               'License :: OSI Approved :: MIT License',
+               'Intended Audience :: Developers',
+               'Programming Language :: Python :: 2.6',
+               'Programming Language :: Python :: 2.7',
+               'Programming Language :: Python :: 3',
+               'Topic :: Software Development',
+               'Topic :: System :: Hardware']
 
 _MLX90640 = Extension(
     '_MLX90640',
@@ -54,7 +63,8 @@ _MLX90640 = Extension(
 
 setup(
     name = 'MLX90640',
-    version = '0.0.1',
+    version = '0.0.2',
+    classifiers = classifiers,
     ext_modules = [ _MLX90640 ],
     py_modules = ["MLX90640"],
     install_requires=[],

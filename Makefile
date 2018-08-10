@@ -30,6 +30,15 @@ interp: examples/interp.o examples/interpolate.o examples/fb.o libMLX90640_API.a
 video: examples/video.o examples/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ -lbcm2835 -lavcodec -lavutil -lavformat
 
+bcm2835-1.55.tar.gz:	
+	wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.55.tar.gz
+
+bcm2835-1.55: bcm2835-1.55.tar.gz
+	tar xzvf bcm2835-1.55.tar.gz
+
+bcm2835: bcm2835-1.55
+	cd bcm2835-1.55; ./configure; make; sudo make install
+
 clean:
 	rm -f test step fbuf interp video
 	rm -f examples/*.o

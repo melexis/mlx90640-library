@@ -3,8 +3,8 @@
 
 %{
 int setup(int fps);
-void cleanup();
-float * get_frame();
+void cleanup(void);
+float * get_frame(void);
 %}
 
 %typemap(out) float *get_frame %{
@@ -15,5 +15,5 @@ float * get_frame();
 %}
 
 int setup(int fps);
-void cleanup();
-float * get_frame();
+void cleanup(void);
+float * get_frame(void);

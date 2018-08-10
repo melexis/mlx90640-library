@@ -59,7 +59,7 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
 	return 0;
 }
 
-int setup(int fps){
+extern "C" int setup(int fps){
 	bcm2835_init();
 	bcm2835_i2c_begin();
 	bcm2835_i2c_set_baudrate(400000);
@@ -112,11 +112,11 @@ int setup(int fps){
 	return 0;
 }
 
-void cleanup(){
+extern "C" void cleanup(void){
 	bcm2835_close();
 }
 
-float * get_frame(){
+extern "C" float * get_frame(void){
 	int retries = 6;
 	int subpage;
 	bool subpages[2] = {0,0};

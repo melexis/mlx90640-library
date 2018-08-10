@@ -6,3 +6,9 @@ fbuf
 step
 test
 interp
+video
+bcm2835-*
+*.egg-info
+*.py[cod]
+python/build
+python/dist
