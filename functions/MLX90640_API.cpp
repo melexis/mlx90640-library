@@ -83,6 +83,37 @@ int MLX90640_GetData(uint8_t slaveAddr, uint16_t *frameData)
     frameData[833] = statusRegister & 0x0001; // Populate the subpage number 
 }
 
+int MLX90640_InterpolateOutliers(uint16_t *frameData, uint16_t *eepromData)
+{
+    for(int x = 0; x < 768; x++){
+        int broken = eepromData[64 + x] == 0;
+        int outlier = eepromData[64 + x] & 0x0001;
+        if (broken){
+            uint32_t val = 0;
+            int count = 0;
+            if(x - 32 > 0){
+                val += frameData[x - 32];
+                val += frameData[x - 1];
+                count += 2;
+            } else if (x - 1 > 0){
+                val += frameData[x - 1];
+                count += 1;
+            }
+            if(x + 32 < 768){
+                val += frameData[x + 32];
+                val += frameData[x + 1];
+                count += 2;
+            } else if (x + 1 < 768){
+                val += frameData[x + 1];
+                count += 1;
+            }
+            frameData[x] = val / count;
+        }
+    }
+
+    return 0;
+}
+
 int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
 {
     uint16_t dataReady = 1;

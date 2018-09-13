@@ -5,7 +5,6 @@
 #include <chrono>
 #include <thread>
 #include "headers/MLX90640_API.h"
-#include "bcm2835.h"
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -20,11 +19,7 @@
 #define FMT_STRING "\u2588\u2588"
 
 #define MLX_I2C_ADDR 0x33
-void pulse(){
-	bcm2835_gpio_write(RPI_BPLUS_GPIO_J8_07, 1);
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	bcm2835_gpio_write(RPI_BPLUS_GPIO_J8_07, 0);
-}
+
 int main(){
     int state = 0;
     printf("Starting...\n");
@@ -37,13 +32,9 @@ int main(){
 
     std::fstream fs;
 
-
-    bcm2835_init();
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_07, BCM2835_GPIO_FSEL_OUTP);
-
     MLX90640_SetDeviceMode(MLX_I2C_ADDR, 0);
     MLX90640_SetSubPageRepeat(MLX_I2C_ADDR, 0);
-    MLX90640_SetRefreshRate(MLX_I2C_ADDR, 0b110);
+    MLX90640_SetRefreshRate(MLX_I2C_ADDR, 0b010);
     MLX90640_SetChessMode(MLX_I2C_ADDR);
     //MLX90640_SetSubPage(MLX_I2C_ADDR, 0);
     printf("Configured...\n");
@@ -51,6 +42,7 @@ int main(){
     paramsMLX90640 mlx90640;
     MLX90640_DumpEE(MLX_I2C_ADDR, eeMLX90640);
     MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
+
     int refresh = MLX90640_GetRefreshRate(MLX_I2C_ADDR);
     printf("EE Dumped...\n");
 
@@ -58,17 +50,15 @@ int main(){
     int subpage;
     static float mlx90640To[768];
     while (1){
-	//bcm2835_gpio_write(RPI_BPLUS_GPIO_J8_07, state);
-	state = !state;
-	//printf("State: %d \n", state);
-	pulse();
+        state = !state;
+        //printf("State: %d \n", state);
         MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
-	pulse();
+        MLX90640_InterpolateOutliers(frame, eeMLX90640);
         eTa = MLX90640_GetTa(frame, &mlx90640);
         subpage = MLX90640_GetSubPageNumber(frame);
         MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
         printf("Subpage: %d\n", subpage);
-	//MLX90640_SetSubPage(MLX_I2C_ADDR,!subpage);
+        //MLX90640_SetSubPage(MLX_I2C_ADDR,!subpage);
 
         for(int x = 0; x < 32; x++){
             for(int y = 0; y < 24; y++){
@@ -84,24 +74,23 @@ int main(){
                 else if (val > 26.0){
                     printf(ANSI_COLOR_YELLOW FMT_STRING ANSI_COLOR_YELLOW, val);
                 }
-		else if ( val > 20.0 ){
-		    printf(ANSI_COLOR_NONE FMT_STRING ANSI_COLOR_RESET, val);
-		}
-		else if (val > 17.0) {
+                else if ( val > 20.0 ){
+                    printf(ANSI_COLOR_NONE FMT_STRING ANSI_COLOR_RESET, val);
+                }
+                else if (val > 17.0) {
                     printf(ANSI_COLOR_GREEN FMT_STRING ANSI_COLOR_RESET, val);
-		}
-		else if (val > 10.0) {
+                }
+                else if (val > 10.0) {
                     printf(ANSI_COLOR_CYAN FMT_STRING ANSI_COLOR_RESET, val);
-		}
-		else {
+                }
+                else {
                     printf(ANSI_COLOR_BLUE FMT_STRING ANSI_COLOR_RESET, val);
                 }
             }
             std::cout << std::endl;
         }
-	      //std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(20));
         printf("\x1b[33A");
     }
-    bcm2835_close();
     return 0;
 }
