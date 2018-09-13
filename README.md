@@ -5,7 +5,45 @@ MLX90640 library functions
 
 ** EXPERIMENTAL **
 
-This port uses the bcm2835 library, install like so:
+This port uses either generic Linux I2C or the  bcm2835 library.
+
+### Generic Linux I2C Mode
+
+To get the best out of your sensor you should modify `/boot/config.txt` and change your I2C baudrate.
+
+The fastest rate recommended for compatibility with other sensors is 400kHz. This is compatible with SMBus devices:
+
+```text
+dtparam=i2c1_baudrate=400000
+```
+
+This will give you a framerate of - at most - 8FPS.
+
+If you're just using the MLX90640 and, for example, the 1.12" OLED, you can safely use 1MHz:
+
+```text
+dtparam=i2c1_baudrate=1000000
+```
+
+This will give you a framerate of - at most - 32FPS.
+
+Now build the MLX90640 library and examples in LINUX I2C mode:
+
+```text
+make clean
+make I2C_MODE=LINUX
+```
+
+### BCM2835 Library Mode
+
+To use the bcm2835 library, install like so:
+
+
+```text
+make bcm2835
+```
+
+Or, step by step:
 
 ```text
 wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.55.tar.gz
