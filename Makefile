@@ -2,7 +2,7 @@ I2C_MODE = RPI
 I2C_LIBS = -lbcm2835
 
 ifeq ($(I2C_MODE), LINUX)
-    I2C_LIBS =
+	I2C_LIBS =
 endif
 
 all: examples
@@ -22,7 +22,7 @@ examples/test.o examples/step.o examples/fbuf.o examples/interp.o examples/video
 
 test step fbuf interp video : CXXFLAGS+=-I. -std=c++11
 
-examples/interpolate.o : CC=$(CXX) -std=c++11
+examples/lib/interpolate.o : CC=$(CXX) -std=c++11
 
 test: examples/test.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
@@ -30,13 +30,13 @@ test: examples/test.o libMLX90640_API.a
 step: examples/step.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-fbuf: examples/fbuf.o examples/fb.o libMLX90640_API.a
+fbuf: examples/fbuf.o examples/lib/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-interp: examples/interp.o examples/interpolate.o examples/fb.o libMLX90640_API.a
+interp: examples/interp.o examples/lib/interpolate.o examples/lib/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-video: examples/video.o examples/fb.o libMLX90640_API.a
+video: examples/video.o examples/lib/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS) -lavcodec -lavutil -lavformat
 
 bcm2835-1.55.tar.gz:	
@@ -51,6 +51,7 @@ bcm2835: bcm2835-1.55
 clean:
 	rm -f test step fbuf interp video
 	rm -f examples/*.o
+	rm -f examples/lib/*.o
 	rm -f *.o
 	rm -f *.so
 	rm -f test

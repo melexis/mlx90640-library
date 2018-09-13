@@ -6,8 +6,8 @@
 #include <thread>
 #include <math.h>
 #include "headers/MLX90640_API.h"
-#include "fb.h"
-#include "interpolate.h"
+#include "lib/fb.h"
+#include "lib/interpolate.h"
 
 #define MLX_I2C_ADDR 0x33
 

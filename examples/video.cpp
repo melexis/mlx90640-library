@@ -6,7 +6,7 @@
 #include <thread>
 #include <math.h>
 #include "headers/MLX90640_API.h"
-#include "fb.h"
+#include "lib/fb.h"
 #include "bcm2835.h"
 #include <math.h>
 

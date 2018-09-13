@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <sys/mman.h>
+#include <sys/ioctl.h>
 
 int fbfd = 0;
 struct fb_var_screeninfo orig_vinfo;

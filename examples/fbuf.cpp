@@ -6,7 +6,7 @@
 #include <thread>
 #include <math.h>
 #include "headers/MLX90640_API.h"
-#include "fb.h"
+#include "lib/fb.h"
 
 #define MLX_I2C_ADDR 0x33
 
