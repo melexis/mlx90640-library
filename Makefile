@@ -16,7 +16,7 @@ libMLX90640_API.a: functions/MLX90640_API.o functions/MLX90640_$(I2C_MODE)_I2C_D
 	ar rcs $@ $^
 	ranlib $@
 
-functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o : CXXFLAGS+=-fPIC -I headers -shared $(I2C_LIBS)
+functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o functions/MLX90640_LINUX_I2C_Driver.o : CXXFLAGS+=-fPIC -I headers -shared $(I2C_LIBS)
 
 examples/test.o examples/step.o examples/fbuf.o examples/interp.o examples/video.o : CXXFLAGS+=-std=c++11
 
@@ -52,6 +52,7 @@ clean:
 	rm -f test step fbuf interp video
 	rm -f examples/*.o
 	rm -f examples/lib/*.o
+	rm -f functions/*.o
 	rm -f *.o
 	rm -f *.so
 	rm -f test
