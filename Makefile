@@ -20,9 +20,12 @@ functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o functions/MLX90640_
 
 examples/test.o examples/step.o examples/fbuf.o examples/interp.o examples/video.o : CXXFLAGS+=-std=c++11
 
-test step fbuf interp video : CXXFLAGS+=-I. -std=c++11
+test step fbuf interp video hotspot : CXXFLAGS+=-I. -std=c++11
 
 examples/lib/interpolate.o : CC=$(CXX) -std=c++11
+
+hotspot: examples/hotspot.o examples/lib/fb.o libMLX90640_API.a
+	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
 test: examples/test.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
