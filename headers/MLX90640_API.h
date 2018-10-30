@@ -60,5 +60,6 @@
     int MLX90640_GetCurMode(uint8_t slaveAddr); 
     int MLX90640_SetInterleavedMode(uint8_t slaveAddr);
     int MLX90640_SetChessMode(uint8_t slaveAddr);
+    void MLX90640_BadPixelsCorrection(uint16_t *pixels, float *to, int mode, paramsMLX90640 *params);
     
 #endif
