@@ -631,7 +631,7 @@ void MLX90640_BadPixelsCorrection(uint16_t *pixels, float *to, int mode, paramsM
                 {
                     ap[0] = to[pixels[pix]+1] - to[pixels[pix]+2];
                     ap[1] = to[pixels[pix]-1] - to[pixels[pix]-2];
-                    if(abs(ap[0]) > abs(ap[1]))
+                    if(fabs(ap[0]) > fabs(ap[1]))
                     {
                         to[pixels[pix]] = to[pixels[pix]-1] + ap[1];                        
                     }
