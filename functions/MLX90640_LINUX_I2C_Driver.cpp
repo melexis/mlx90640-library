@@ -21,7 +21,8 @@
 #include <fcntl.h>
 #include <string.h>
 #include <linux/i2c-dev.h>
-//#include <linux/i2c.h>
+#include <linux/i2c.h>
+#include <sys/ioctl.h>
 
 int i2c_fd = 0;
 const char *i2c_device = "/dev/i2c-1";
@@ -47,12 +48,12 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     i2c_messages[0].addr = slaveAddr;
     i2c_messages[0].flags = 0;
     i2c_messages[0].len = 2;
-    i2c_messages[0].buf = cmd;
+    i2c_messages[0].buf = (__u8*)cmd;
 
     i2c_messages[1].addr = slaveAddr;
     i2c_messages[1].flags = I2C_M_RD | I2C_M_NOSTART;
     i2c_messages[1].len = nMemAddressRead * 2;
-    i2c_messages[1].buf = buf;
+    i2c_messages[1].buf = (__u8*)buf;
 
     //result = write(i2c_fd, cmd, 3);    
     //result = read(i2c_fd, buf, nMemAddressRead*2);
@@ -89,7 +90,7 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
     i2c_messages[0].addr = slaveAddr;
     i2c_messages[0].flags = 0;
     i2c_messages[0].len = 4;
-    i2c_messages[0].buf = cmd;
+    i2c_messages[0].buf = (__u8*)cmd;
 
     i2c_messageset[0].msgs = i2c_messages;
     i2c_messageset[0].nmsgs = 1;
