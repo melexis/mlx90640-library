@@ -8,11 +8,11 @@ C = ffi.dlopen("./_MLX90640.cpython-37m-arm-linux-gnueabihf.so")
 def setup(fps):
     C.setup(fps)
 
-def cleanup():
-    C.cleanup()
-
 def get_frame():
-    return C.get_frame()
+    f = C.get_frame()
+    f = [f[i] for i in range(768)]
+    return f
+
 
 
 if __name__ == "__main__":
@@ -33,13 +33,7 @@ if __name__ == "__main__":
 
     setup(16)
     f = get_frame()
-
-    f = [f[i] for i in range(768)]
-
     print(f)
-
-    v_min = min(f)
-    v_max = max(f)
 
     print(min(f))
     print(max(f))
