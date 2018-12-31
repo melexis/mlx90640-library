@@ -1,9 +1,12 @@
 import cffi
+from pathlib import Path
+
+lib_path = Path(__file__).parent / "_MLX90640.cpython-37m-arm-linux-gnueabihf.so"
 
 ffi = cffi.FFI()
 ffi.cdef("int setup(int fps);")
 ffi.cdef("float *  get_frame(void);")
-C = ffi.dlopen("./_MLX90640.cpython-37m-arm-linux-gnueabihf.so")
+C = ffi.dlopen(str(lib_path))
 
 def setup(fps):
     C.setup(fps)
