@@ -40,7 +40,7 @@ classifiers = ['Development Status :: 4 - Beta',
 _MLX90640 = Extension(
     '_MLX90640',
     include_dirs=['../headers'],
-    sources=['../functions/MLX90640_API.cpp', '../functions/MLX90640_LINUX_I2C_Driver.cpp', 'mlx90640-python.cpp']
+    sources=['../functions/MLX90640_API.cpp', '../functions/MLX90640_LINUX_I2C_Driver.cpp', 'cffi_wrapper.cpp']
 )
 
 setup(
