@@ -1,31 +1,16 @@
 import sys
-from pathlib import Path
 import time
 
 import numpy as np
 
-build_path = Path(__file__).resolve().parents[1] / "build" /  "lib.linux-armv7l-3.7"
-sys.path.append(str(build_path))
-
-from MLX90640 import API, ffi, temperature_data_to_ndarray
+from MLX90640 import API, ffi, temperature_data_to_ndarray, hertz_to_refresh_rate
 
 MLX_I2C_ADDR = 0x33
 
 hertz = 8
 
-hertzSettings = {
-    0.5: 0,
-    1: 1,
-    2: 2,
-    4: 3,
-    8: 4,
-    16: 5,
-    32: 6,
-    64: 7
-}
-
 # settings
-API.SetRefreshRate(MLX_I2C_ADDR, hertzSettings[hertz])
+API.SetRefreshRate(MLX_I2C_ADDR, hertz_to_refresh_rate[hertz])
 API.SetChessMode(MLX_I2C_ADDR)
 
 # POR

@@ -59,3 +59,11 @@ def temperature_data_to_ndarray(frame):
     """Converts c buffer storing temp data to numpy array of shape 24, 32"""
     a = np.frombuffer(ffi.buffer(frame, np.dtype(np.float32).itemsize*768), dtype=np.float32)
     return a.reshape((24, 32))
+
+_hertz_refreshrate_pairs = [ 
+    (0.5, 0), (1, 1), (2, 2), (4, 3),
+    (8, 4), (16, 5), (32, 6), (64, 7)]
+
+hertz_to_refresh_rate = {h: rr for h, rr in _hertz_refreshrate_pairs}
+refresh_rate_to_hertz = {rr: h for h, rr in _hertz_refreshrate_pairs}
+

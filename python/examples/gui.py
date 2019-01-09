@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 import time
 
 import numpy as np
@@ -8,94 +7,87 @@ from PIL import Image
 import matplotlib as mpl
 from matplotlib import cm
 
-build_path = Path(__file__).resolve().parents[1] / "build" /  "lib.linux-armv7l-3.7"
-sys.path.append(str(build_path))
+from MLX90640 import API, ffi, temperature_data_to_ndarray, hertz_to_refresh_rate
 
-from MLX90640 import API, ffi, temperature_data_to_ndarray
-
-# setu up colour map
-norm = mpl.colors.Normalize(vmin=20.,vmax=25.)
-cmap = cm.get_cmap('Spectral_r')
-
-def td_to_image(f):
-    norm2 = mpl.colors.Normalize(vmin=f.min(),vmax=f.max())
-    img = Image.fromarray(np.uint8(cmap(norm2(f))*255))
+def td_to_image(f, cmap):
+    norm = mpl.colors.Normalize(vmin=f.min(),vmax=f.max())
+    img = Image.fromarray(np.uint8(cmap(norm(f))*255))
     img = img.convert("RGB").resize((320,240), Image.BICUBIC)
     return img
 
-pygame.init()
-display = pygame.display.set_mode((320, 240))
-pygame.display.set_caption('Thermal Cam')
+def increment_refresh_rate():
+    rr = API.GetRefreshRate(MLX_I2C_ADDR)
+    new_rr = (rr+1) % 8
+    print(f"Set new refresh rate to {new_rr}")
+    API.SetRefreshRate(MLX_I2C_ADDR, new_rr)
 
+def show_text(display, text, pos, font, action=None):
+    surf = font.render(text, False, (255,255,255))
+    if action and pygame.mouse.get_pressed()[0] and surf.get_rect().move(pos).collidepoint(pygame.mouse.get_pos()):
+        action()
+    display.blit(surf, pos)
 
-MLX_I2C_ADDR = 0x33
+def main():
+    # setup colour map
+    cmap = cm.get_cmap('Spectral_r')
 
-hertz = 8
+    # set up display
+    pygame.init()
+    pygame.font.init()
+    display = pygame.display.set_mode((320, 240))
+    pygame.display.set_caption('Thermal Cam')
+    pygame.mouse.set_visible(True)
+    font = pygame.font.SysFont('freemono', 10)
 
-hertzSettings = {
-    0.5: 0,
-    1: 1,
-    2: 2,
-    4: 3,
-    8: 4,
-    16: 5,
-    32: 6,
-    64: 7
-}
+    # mlx90640 settings
+    MLX_I2C_ADDR = 0x33
+    hertz_default = 8
+    API.SetRefreshRate(MLX_I2C_ADDR, hertz_to_refresh_rate[hertz_default])
+    API.SetChessMode(MLX_I2C_ADDR)
 
-# settings
-API.SetRefreshRate(MLX_I2C_ADDR, hertzSettings[hertz])
-API.SetChessMode(MLX_I2C_ADDR)
+    # Extract calibration data from EEPROM and store in RAM
+    eeprom_data = ffi.new("uint16_t[832]")
+    params = ffi.new("paramsMLX90640*")
+    API.DumpEE(MLX_I2C_ADDR, eeprom_data)
+    API.ExtractParameters(eeprom_data, params)
 
-# POR
-time.sleep(.08) # wait 80ms
-time.sleep(2/hertz) # delay det by refresh rate
+    TA_SHIFT = 8 # the default shift for a MLX90640 device in open air
+    emissivity = 0.95
 
-# Extract calibration data from EEPROM and store in RAM
-eeprom_data = ffi.new("uint16_t[832]")
-params = ffi.new("paramsMLX90640*")
-API.DumpEE(MLX_I2C_ADDR, eeprom_data)
-API.ExtractParameters(eeprom_data, params)
-print(params.KsTa)
-print(params.kVdd)
-for i in range(5):
-    print(params.brokenPixels[i])
-for i in range(5):
-    print(params.outlierPixels[i])
+    frame_buffer = ffi.new("uint16_t[834]")
+    image_buffer = ffi.new("float[768]")
 
-# TODO: if absolute - wait 4 mins
+    last = time.monotonic()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
 
-TA_SHIFT = 8 # the default shift for a MLX90640 device in open air
-emissivity = 0.95
+        API.GetFrameData(MLX_I2C_ADDR, frame_buffer);
+        now = time.monotonic()
+        diff = now - last
+        last = now
 
-frame_buffer = ffi.new("uint16_t[834]")
-image_buffer = ffi.new("float[768]")
+        # reflected temperature based on the sensor
+        # ambient temperature
+        tr = API.GetTa(frame_buffer, params) - TA_SHIFT
 
-print("Calc Hertz should be close to chosen value (%s)" % hertz)
-last = time.monotonic()
-while True:
-    API.GetFrameData(MLX_I2C_ADDR, frame_buffer);
-    now = time.monotonic()
-    diff = now - last
-    print("Calc Hz: %s" % (1/diff))
-    last = now
+        # The object temperatures for all 768 pixels in a
+        # frame are stored in the mlx90640To array
+        API.CalculateTo(frame_buffer, params, emissivity, tr, image_buffer);
 
-    # reflected temperature based on the sensor
-    # ambient temperature
-    tr = API.GetTa(frame_buffer, params) - TA_SHIFT
+        ta_np = temperature_data_to_ndarray(image_buffer)
+        ta_img = td_to_image(ta_np, cmap)
 
-    # The object temperatures for all 768 pixels in a
-    # frame are stored in the mlx90640To array
-    API.CalculateTo(frame_buffer, params, emissivity, tr, image_buffer);
-    print("Subpage no: %s" % API.GetSubPageNumber(frame_buffer))
+        pyg_img = pygame.image.fromstring(ta_img.tobytes(), ta_img.size, ta_img.mode)
+        display.blit(pyg_img, (0,0))
 
-    ta_np = temperature_data_to_ndarray(image_buffer)
-    ta_img = td_to_image(ta_np)
+        show_text(display, "Calc Hz: %03.1f" % (1/diff), (0, 10+2), font, action=increment_refresh_rate)
+        show_text(display, "Temp Ref: %05.1f" % tr, (0, 10+2+10+2), font)
 
-    display.fill((255,255,255))
-    pyg_img = pygame.image.fromstring(ta_img.tobytes(), ta_img.size, ta_img.mode)
-    display.blit(pyg_img, (0,0))
-    pygame.display.update()
+        pygame.display.update()
 
-
+if __name__ == "__main__":
+    main()
 

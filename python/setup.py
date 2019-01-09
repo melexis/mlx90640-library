@@ -45,10 +45,10 @@ _MLX90640 = Extension(
 
 setup(
     name = 'MLX90640',
-    version = '0.0.2',
+    version = '0.1.0',
     classifiers = classifiers,
     ext_modules = [ _MLX90640 ],
     py_modules = ["MLX90640"],
-    install_requires=[],
+    install_requires=['cffi', 'numpy'],
     cmdclass = {'build_py' : build_py_ext_first, 'sdist' : sdist_ext_first},
 )
