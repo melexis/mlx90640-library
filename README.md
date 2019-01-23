@@ -9,6 +9,12 @@ This port uses either generic Linux I2C or the  bcm2835 library.
 
 ### Generic Linux I2C Mode
 
+Make sure the Linux I2C dev library is installed:
+
+```text
+sudo apt-get install libi2c-dev
+```
+
 To get the best out of your sensor you should modify `/boot/config.txt` and change your I2C baudrate.
 
 The fastest rate recommended for compatibility with other sensors is 400kHz. This is compatible with SMBus devices:
