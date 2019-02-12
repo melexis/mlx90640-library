@@ -40,7 +40,7 @@ interp: examples/interp.o examples/lib/interpolate.o examples/lib/fb.o libMLX906
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
 video: examples/video.o examples/lib/fb.o libMLX90640_API.a
-	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS) -lavcodec -lavutil -lavformat
+	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS) -lavcodec -lavutil -lavformat -lbcm2835
 
 bcm2835-1.55.tar.gz:	
 	wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.55.tar.gz
