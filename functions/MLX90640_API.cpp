@@ -35,6 +35,8 @@ void ExtractCILCParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
 int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640);
 int CheckAdjacentPixels(uint16_t pix1, uint16_t pix2);
 int CheckEEPROMValid(uint16_t *eeData);  
+float GetMedian(float *values, int n);
+int IsPixelBad(uint16_t pixel,paramsMLX90640 *params);
 
   
 int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
@@ -144,7 +146,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
         error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
         if(error != 0)
         {
-	    printf("frameData read error \n");
+            printf("frameData read error \n");
             return error;
         }
                    
@@ -159,7 +161,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     
     if(cnt > 4)
     {
-	printf("cnt > 4 error \n");
+        printf("cnt > 4 error \n");
         return -8;
     }    
     //printf("count: %d \n", cnt); 
@@ -680,6 +682,109 @@ int MLX90640_GetSubPageNumber(uint16_t *frameData)
     return frameData[833];    
 
 }    
+
+//------------------------------------------------------------------------------
+
+void MLX90640_BadPixelsCorrection(uint16_t *pixels, float *to, int mode, paramsMLX90640 *params)
+{   
+    float ap[4];
+    uint8_t pix;
+    uint8_t line;
+    uint8_t column;
+    
+    pix = 0;
+    while(pixels[pix]< 65535)
+    {
+        line = pixels[pix]>>5;
+        column = pixels[pix] - (line<<5);
+        
+        if(mode == 1)
+        {        
+            if(line == 0)
+            {
+                if(column == 0)
+                {        
+                    to[pixels[pix]] = to[33];                    
+                }
+                else if(column == 31)
+                {
+                    to[pixels[pix]] = to[62];                      
+                }
+                else
+                {
+                    to[pixels[pix]] = (to[pixels[pix]+31] + to[pixels[pix]+33])/2.0;                    
+                }        
+            }
+            else if(line == 23)
+            {
+                if(column == 0)
+                {
+                    to[pixels[pix]] = to[705];                    
+                }
+                else if(column == 31)
+                {
+                    to[pixels[pix]] = to[734];                       
+                }
+                else
+                {
+                    to[pixels[pix]] = (to[pixels[pix]-33] + to[pixels[pix]-31])/2.0;                       
+                }                       
+            } 
+            else if(column == 0)
+            {
+                to[pixels[pix]] = (to[pixels[pix]-31] + to[pixels[pix]+33])/2.0;                
+            }
+            else if(column == 31)
+            {
+                to[pixels[pix]] = (to[pixels[pix]-33] + to[pixels[pix]+31])/2.0;                
+            } 
+            else
+            {
+                ap[0] = to[pixels[pix]-33];
+                ap[1] = to[pixels[pix]-31];
+                ap[2] = to[pixels[pix]+31];
+                ap[3] = to[pixels[pix]+33];
+                to[pixels[pix]] = GetMedian(ap,4);
+            }                   
+        }
+        else
+        {        
+            if(column == 0)
+            {
+                to[pixels[pix]] = to[pixels[pix]+1];            
+            }
+            else if(column == 1 || column == 30)
+            {
+                to[pixels[pix]] = (to[pixels[pix]-1]+to[pixels[pix]+1])/2.0;                
+            } 
+            else if(column == 31)
+            {
+                to[pixels[pix]] = to[pixels[pix]-1];
+            } 
+            else
+            {
+                if(IsPixelBad(pixels[pix]-2,params) == 0 && IsPixelBad(pixels[pix]+2,params) == 0)
+                {
+                    ap[0] = to[pixels[pix]+1] - to[pixels[pix]+2];
+                    ap[1] = to[pixels[pix]-1] - to[pixels[pix]-2];
+                    if(fabs(ap[0]) > fabs(ap[1]))
+                    {
+                        to[pixels[pix]] = to[pixels[pix]-1] + ap[1];                        
+                    }
+                    else
+                    {
+                        to[pixels[pix]] = to[pixels[pix]+1] + ap[0];                        
+                    }
+                }
+                else
+                {
+                    to[pixels[pix]] = (to[pixels[pix]-1]+to[pixels[pix]+1])/2.0;                    
+                }            
+            }                      
+        } 
+        pix = pix + 1;    
+    }    
+}
 
 //------------------------------------------------------------------------------
 
@@ -1303,7 +1408,7 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
      return 0;    
  }
  
- //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
  
  int CheckEEPROMValid(uint16_t *eeData)  
  {
@@ -1315,4 +1420,50 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
      }
      
      return -7;    
- }        
+ } 
+
+//------------------------------------------------------------------------------
+ 
+float GetMedian(float *values, int n)
+ {
+    float temp;
+    
+    for(int i=0; i<n-1; i++)
+    {
+        for(int j=i+1; j<n; j++)
+        {
+            if(values[j] < values[i]) 
+            {                
+                temp = values[i];
+                values[i] = values[j];
+                values[j] = temp;
+            }
+        }
+    }
+    
+    if(n%2==0) 
+    {
+        return ((values[n/2] + values[n/2 - 1]) / 2.0);
+        
+    } 
+    else 
+    {
+        return values[n/2];
+    }
+    
+ }           
+
+//------------------------------------------------------------------------------
+
+int IsPixelBad(uint16_t pixel,paramsMLX90640 *params)
+{
+    for(int i=0; i<5; i++)
+    {
+        if(pixel == params->outlierPixels[i] || pixel == params->brokenPixels[i])
+        {
+            return 1;
+        }    
+    }   
+    
+    return 0;     
+}     

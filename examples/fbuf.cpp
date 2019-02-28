@@ -108,10 +108,13 @@ int main(){
     while (1){
         auto start = std::chrono::system_clock::now();
         MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
-        MLX90640_InterpolateOutliers(frame, eeMLX90640);
+        // MLX90640_InterpolateOutliers(frame, eeMLX90640);
 
         eTa = MLX90640_GetTa(frame, &mlx90640);
         MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
+
+        MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
+        MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
 
         for(int y = 0; y < 24; y++){
             for(int x = 0; x < 32; x++){

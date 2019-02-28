@@ -53,10 +53,14 @@ int main(){
         state = !state;
         //printf("State: %d \n", state);
         MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
-        MLX90640_InterpolateOutliers(frame, eeMLX90640);
+        // MLX90640_InterpolateOutliers(frame, eeMLX90640);
         eTa = MLX90640_GetTa(frame, &mlx90640);
         subpage = MLX90640_GetSubPageNumber(frame);
         MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
+
+        MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
+        MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
+
         printf("Subpage: %d\n", subpage);
         //MLX90640_SetSubPage(MLX_I2C_ADDR,!subpage);
 

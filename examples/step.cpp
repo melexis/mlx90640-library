@@ -54,12 +54,15 @@ int main(){
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
         MLX90640_GetData(MLX_I2C_ADDR, frame);
-        MLX90640_InterpolateOutliers(frame, eeMLX90640);
+        // MLX90640_InterpolateOutliers(frame, eeMLX90640);
         subpage = MLX90640_GetSubPageNumber(frame);
         // Start the next meausrement
         MLX90640_StartMeasurement(MLX_I2C_ADDR, !subpage);
         eTa = MLX90640_GetTa(frame, &mlx90640);
         MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
+
+        MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
+        MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
 
         printf("Subpage: %d\n", subpage);
 
