@@ -183,7 +183,7 @@ static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_
 
     // some formats want stream headers to be separate
     if(avFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
-        c->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
 	
 	printf("Writing header...\n");
