@@ -60,13 +60,21 @@ make
 sudo make install
 ```
 
-To install dependencies:
+### Dependencies
+
+libav for `video` example:
 
 ```text
 sudo apt-get install libavutil-dev libavcodec-dev libavformat-dev
 ```
 
-Then just `make` and `sudo ./test` or one of the other examples listed below:
+SDL2 for `sdlscale` example:
+
+```text
+sudo apt install libsdl2-dev
+```
+
+Then just `make <examplename>` and `sudo ./test` or one of the other examples listed below:
 
 # fbuf
 
@@ -109,3 +117,22 @@ sudo ./step
 
 Attempt to run in step by step mode (experimental)
 
+# sdlscale
+
+Displays the MLX90640 sensor full-screen using hardware acceleration in SDL2.
+
+Hit Spacebar to change from aspect-ratio correct to full-screen-stretched modes.
+
+Hit Escape to exit.
+
+```
+sudo ./sdlscale
+```
+
+Requires SDL2 libraries:
+
+```
+sudo apt install libsdl2-dev
+```
+
+On Raspbian Lite you may wish to buildi SDL2 from source with X support disabled to avoid pulling in ~200MB of dependencies. Before configuring/compiling ensure you have `libudev-dev` installed for input support.

@@ -7,7 +7,7 @@ endif
 
 all: examples
 
-examples: test step fbuf interp video
+examples: test step fbuf interp video sdlscale
 
 libMLX90640_API.so: functions/MLX90640_API.o functions/MLX90640_$(I2C_MODE)_I2C_Driver.o
 	$(CXX) -fPIC -shared $^ -o $@ $(I2C_LIBS)
@@ -18,11 +18,16 @@ libMLX90640_API.a: functions/MLX90640_API.o functions/MLX90640_$(I2C_MODE)_I2C_D
 
 functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o functions/MLX90640_LINUX_I2C_Driver.o : CXXFLAGS+=-fPIC -I headers -shared $(I2C_LIBS)
 
-examples/test.o examples/step.o examples/fbuf.o examples/interp.o examples/video.o : CXXFLAGS+=-std=c++11
+examples/test.o examples/step.o examples/fbuf.o examples/interp.o examples/video.o examples/sdlscale.o : CXXFLAGS+=-std=c++11
 
-test step fbuf interp video hotspot : CXXFLAGS+=-I. -std=c++11
+test step fbuf interp video hotspot sdlscale : CXXFLAGS+=-I. -std=c++11
 
 examples/lib/interpolate.o : CC=$(CXX) -std=c++11
+
+examples/sdlscale.o : CXXFLAGS+=`sdl2-config --cflags --libs`
+
+sdlscale: examples/sdlscale.o libMLX90640_API.a
+	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS) `sdl2-config --libs`
 
 hotspot: examples/hotspot.o examples/lib/fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
