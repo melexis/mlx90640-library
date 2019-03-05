@@ -161,7 +161,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     
     if(cnt > 4)
     {
-        printf("cnt > 4 error \n");
+        fprintf(stderr, "cnt > 4 error \n");
         return -8;
     }    
     //printf("count: %d \n", cnt); 
