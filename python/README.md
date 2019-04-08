@@ -6,7 +6,7 @@ We have included a Python example - `rgb-to-gif.py` - which uses the `rawrgb` C+
 
 This example uses Python's subprocess module to offload the task of dealing with the sensor, and it works pretty well!
 
-To get it running, you'll need to build all the C++ examples. If this is your current working directory you can do that with `make -C ../`, otherwise type `make` in the root of this repository.
+To get it running, you'll need to build all the C++ examples. If this is your current working directory you can do that with `make -C .. examples/rawrgb`, otherwise type `make examples/rawrgb` in the root of this repository.
 
 Then run `./rgb-to-gif.py`
 

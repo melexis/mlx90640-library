@@ -1,5 +1,12 @@
 I2C_MODE = RPI
 I2C_LIBS = -lbcm2835
+SRC_DIR = examples/src/
+BUILD_DIR = examples/
+LIB_DIR = $(SRC_DIR)lib/
+
+examples = test rawrgb step fbuf interp video hotspot sdlscale 
+examples_objects = $(addsuffix .o,$(addprefix $(SRC_DIR), $(examples)))
+examples_output = $(addprefix $(BUILD_DIR), $(examples))
 
 ifeq ($(I2C_MODE), LINUX)
 	I2C_LIBS =
@@ -7,7 +14,7 @@ endif
 
 all: examples
 
-examples: test rawrgb step fbuf interp video sdlscale
+examples: $(examples_output)
 
 libMLX90640_API.so: functions/MLX90640_API.o functions/MLX90640_$(I2C_MODE)_I2C_Driver.o
 	$(CXX) -fPIC -shared $^ -o $@ $(I2C_LIBS)
@@ -18,36 +25,36 @@ libMLX90640_API.a: functions/MLX90640_API.o functions/MLX90640_$(I2C_MODE)_I2C_D
 
 functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o functions/MLX90640_LINUX_I2C_Driver.o : CXXFLAGS+=-fPIC -I headers -shared $(I2C_LIBS)
 
-exmaples/rawrgb.o examples/test.o examples/step.o examples/fbuf.o examples/interp.o examples/video.o examples/sdlscale.o : CXXFLAGS+=-std=c++11
+$(examples_objects) : CXXFLAGS+=-std=c++11
 
-test rawrgb step fbuf interp video hotspot sdlscale : CXXFLAGS+=-I. -std=c++11
+$(examples_output) : CXXFLAGS+=-I. -std=c++11
 
-examples/lib/interpolate.o : CC=$(CXX) -std=c++11
+examples/src/lib/interpolate.o : CC=$(CXX) -std=c++11
 
-examples/sdlscale.o : CXXFLAGS+=`sdl2-config --cflags --libs`
+examples/src/sdlscale.o : CXXFLAGS+=`sdl2-config --cflags --libs`
 
-sdlscale: examples/sdlscale.o libMLX90640_API.a
+$(BUILD_DIR)sdlscale: $(SRC_DIR)sdlscale.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS) `sdl2-config --libs`
 
-hotspot: examples/hotspot.o examples/lib/fb.o libMLX90640_API.a
+$(BUILD_DIR)hotspot: $(SRC_DIR)hotspot.o $(LIB_DIR)fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-test: examples/test.o libMLX90640_API.a
+$(BUILD_DIR)test: $(SRC_DIR)test.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-rawrgb: examples/rawrgb.o libMLX90640_API.a
+$(BUILD_DIR)rawrgb: $(SRC_DIR)rawrgb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-step: examples/step.o libMLX90640_API.a
+$(BUILD_DIR)step: $(SRC_DIR)step.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-fbuf: examples/fbuf.o examples/lib/fb.o libMLX90640_API.a
+$(BUILD_DIR)fbuf: $(SRC_DIR)fbuf.o $(LIB_DIR)fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-interp: examples/interp.o examples/lib/interpolate.o examples/lib/fb.o libMLX90640_API.a
+$(BUILD_DIR)interp: $(SRC_DIR)interp.o $(LIB_DIR)interpolate.o $(LIB_DIR)fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS)
 
-video: examples/video.o examples/lib/fb.o libMLX90640_API.a
+$(BUILD_DIR)video: $(SRC_DIR)video.o $(LIB_DIR)fb.o libMLX90640_API.a
 	$(CXX) -L/home/pi/mlx90640-library $^ -o $@ $(I2C_LIBS) -lavcodec -lavutil -lavformat -lbcm2835
 
 bcm2835-1.55.tar.gz:	
@@ -60,11 +67,10 @@ bcm2835: bcm2835-1.55
 	cd bcm2835-1.55; ./configure; make; sudo make install
 
 clean:
-	rm -f test step fbuf interp video
-	rm -f examples/*.o
-	rm -f examples/lib/*.o
+	rm -f $(examples_output)
+	rm -f $(SRC_DIR)*.o
+	rm -f $(LIB_DIR)*.o
 	rm -f functions/*.o
 	rm -f *.o
 	rm -f *.so
-	rm -f test
 	rm -f *.a

@@ -9,11 +9,12 @@ import os
 MAX_FRAMES = 50           # Large sizes get big quick!
 OUTPUT_SIZE = (240, 320)  # Multiple of (24, 32)
 FPS = 16                  # Should match the FPS value in examples/rawrgb.cpp
+RAW_RGB_PATH = "../examples/rawrgb"
 
 frames = []
 
-if not os.path.isfile("../rawrgb"):
-    raise RuntimeError("File ../rawrgb doesn't exist, did you forget to run \"make\"?")
+if not os.path.isfile(RAW_RGB_PATH):
+    raise RuntimeError("{} doesn't exist, did you forget to run \"make\"?".format(RAW_RGB_PATH))
 
 print("""rgb-to-gif.py - output a gif using ./rawrgb command.
 
