@@ -25,8 +25,6 @@ else:
     sys.exit(1)
 
 # Fix so that build_ext runs before build_py
-# Without this, wiringpi.py is generated too late and doesn't
-# end up in the distribution when running setup.py bdist or bdist_wheel.
 # Based on:
 #  https://stackoverflow.com/a/29551581/7938656
 #  and
@@ -37,7 +35,7 @@ class build_py_ext_first(build_py):
         return build_py.run(self)
 
 
-# Make sure wiringpi_wrap.c is available for the source dist, also.
+# Make sure MLX90640_wrap.c is available for the source dist, also.
 class sdist_ext_first(sdist):
     def run(self):
         self.run_command("build_ext")
