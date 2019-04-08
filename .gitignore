@@ -13,5 +13,5 @@ hotspot
 bcm2835-*
 *.egg-info
 *.py[cod]
-python/build
-python/dist
+python/library/build
+python/library/dist

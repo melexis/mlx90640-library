@@ -4,12 +4,16 @@ from datetime import datetime
 import subprocess
 import sys
 from PIL import Image, ImageSequence
+import os
 
 MAX_FRAMES = 50           # Large sizes get big quick!
 OUTPUT_SIZE = (240, 320)  # Multiple of (24, 32)
 FPS = 16                  # Should match the FPS value in examples/rawrgb.cpp
 
 frames = []
+
+if not os.path.isfile("../rawrgb"):
+    raise RuntimeError("File ../rawrgb doesn't exist, did you forget to run \"make\"?")
 
 print("""rgb-to-gif.py - output a gif using ./rawrgb command.
 
@@ -23,7 +27,7 @@ Press Ctrl+C to save & exit!
 """)
 
 try:
-    with subprocess.Popen(["sudo", "./rawrgb"], stdin=subprocess.PIPE, stdout=subprocess.PIPE) as camera:
+    with subprocess.Popen(["sudo", "../rawrgb"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as camera:
         while True:
             # Despite the docs, we use read() here since we want to poll
             # the process for chunks of 2304 bytes, each of which is a frame

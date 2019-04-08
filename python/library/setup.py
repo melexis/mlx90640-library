@@ -9,7 +9,7 @@ from setuptools.command.sdist import sdist
 from distutils.spawn import find_executable
 from glob import glob
 
-sources = ['../functions/MLX90640_API.cpp', 'mlx90640-python.cpp']
+sources = ['../../functions/MLX90640_API.cpp', 'mlx90640-python.cpp']
 # If we have swig, use it.  Otherwise, use the pre-generated
 # wrapper from the source distribution.
 if find_executable('swig'):
