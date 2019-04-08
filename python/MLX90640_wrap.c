@@ -13,31 +13,8 @@
 #define SWIGPYTHON
 #endif
 
+#define SWIG_PYTHON_THREADS
 #define SWIG_PYTHON_DIRECTOR_NO_VTABLE
-
-
-#ifdef __cplusplus
-/* SwigValueWrapper is described in swig.swg */
-template<typename T> class SwigValueWrapper {
-  struct SwigMovePointer {
-    T *ptr;
-    SwigMovePointer(T *p) : ptr(p) { }
-    ~SwigMovePointer() { delete ptr; }
-    SwigMovePointer& operator=(SwigMovePointer& rhs) { T* oldptr = ptr; ptr = 0; delete oldptr; ptr = rhs.ptr; rhs.ptr = 0; return *this; }
-  } pointer;
-  SwigValueWrapper& operator=(const SwigValueWrapper<T>& rhs);
-  SwigValueWrapper(const SwigValueWrapper<T>& rhs);
-public:
-  SwigValueWrapper() : pointer(0) { }
-  SwigValueWrapper& operator=(const T& t) { SwigMovePointer tmp(new T(t)); pointer = tmp; return *this; }
-  operator T&() const { return *pointer.ptr; }
-  T *operator&() { return pointer.ptr; }
-};
-
-template <typename T> T SwigValueInit() {
-  return T();
-}
-#endif
 
 /* -----------------------------------------------------------------------------
  *  This section contains generic SWIG labels for method/variable
@@ -3042,81 +3019,8 @@ static swig_module_info swig_module = {swig_types, 9, 0, 0, 0, 0};
 #define SWIG_VERSION SWIGVERSION
 
 
-#define SWIG_as_voidptr(a) const_cast< void * >(static_cast< const void * >(a)) 
-#define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),reinterpret_cast< void** >(a)) 
-
-
-#include <stdexcept>
-
-
-namespace swig {
-  class SwigPtr_PyObject {
-  protected:
-    PyObject *_obj;
-
-  public:
-    SwigPtr_PyObject() :_obj(0)
-    {
-    }
-
-    SwigPtr_PyObject(const SwigPtr_PyObject& item) : _obj(item._obj)
-    {
-      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      Py_XINCREF(_obj);      
-      SWIG_PYTHON_THREAD_END_BLOCK;
-    }
-    
-    SwigPtr_PyObject(PyObject *obj, bool initial_ref = true) :_obj(obj)
-    {
-      if (initial_ref) {
-        SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-        Py_XINCREF(_obj);
-        SWIG_PYTHON_THREAD_END_BLOCK;
-      }
-    }
-    
-    SwigPtr_PyObject & operator=(const SwigPtr_PyObject& item) 
-    {
-      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      Py_XINCREF(item._obj);
-      Py_XDECREF(_obj);
-      _obj = item._obj;
-      SWIG_PYTHON_THREAD_END_BLOCK;
-      return *this;      
-    }
-    
-    ~SwigPtr_PyObject() 
-    {
-      SWIG_PYTHON_THREAD_BEGIN_BLOCK;
-      Py_XDECREF(_obj);
-      SWIG_PYTHON_THREAD_END_BLOCK;
-    }
-    
-    operator PyObject *() const
-    {
-      return _obj;
-    }
-
-    PyObject *operator->() const
-    {
-      return _obj;
-    }
-  };
-}
-
-
-namespace swig {
-  struct SwigVar_PyObject : SwigPtr_PyObject {
-    SwigVar_PyObject(PyObject* obj = 0) : SwigPtr_PyObject(obj, false) { }
-    
-    SwigVar_PyObject & operator = (PyObject* obj)
-    {
-      Py_XDECREF(_obj);
-      _obj = obj;
-      return *this;      
-    }
-  };
-}
+#define SWIG_as_voidptr(a) (void *)((const void *)(a)) 
+#define SWIG_as_voidptrptr(a) ((void)SWIG_as_voidptr(*a),(void**)(a)) 
 
 
 #include <stdint.h>		// Use the C99 official header
@@ -3271,7 +3175,7 @@ SWIG_AsVal_int (PyObject * obj, int *val)
     if ((v < INT_MIN || v > INT_MAX)) {
       return SWIG_OverflowError;
     } else {
-      if (val) *val = static_cast< int >(v);
+      if (val) *val = (int)(v);
     }
   }  
   return res;
@@ -3300,9 +3204,13 @@ SWIGINTERN PyObject *_wrap_setup(PyObject *SWIGUNUSEDPARM(self), PyObject *args)
   if (!SWIG_IsOK(ecode1)) {
     SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "setup" "', argument " "1"" of type '" "int""'");
   } 
-  arg1 = static_cast< int >(val1);
-  result = (int)setup(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
+  arg1 = (int)(val1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)setup(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
   return resultobj;
 fail:
   return NULL;
@@ -3313,7 +3221,11 @@ SWIGINTERN PyObject *_wrap_cleanup(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
   PyObject *resultobj = 0;
   
   if (!PyArg_ParseTuple(args,(char *)":cleanup")) SWIG_fail;
-  cleanup();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    cleanup();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
@@ -3326,7 +3238,11 @@ SWIGINTERN PyObject *_wrap_get_frame(PyObject *SWIGUNUSEDPARM(self), PyObject *a
   float *result = 0 ;
   
   if (!PyArg_ParseTuple(args,(char *)":get_frame")) SWIG_fail;
-  result = (float *)get_frame();
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (float *)get_frame();
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
   
   resultobj = PyList_New(768);
   for (int i = 0; i < 768; ++i) {
@@ -4086,6 +4002,9 @@ SWIG_init(void) {
   
   SWIG_InstallConstants(d,swig_const_table);
   
+  
+  /* Initialize threading */
+  SWIG_PYTHON_INITIALIZE_THREADS;
 #if PY_VERSION_HEX >= 0x03000000
   return m;
 #else
