@@ -8,6 +8,7 @@ test
 interp
 video
 sdlscale
+rawrgb
 hotspot
 bcm2835-*
 *.egg-info
