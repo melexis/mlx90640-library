@@ -9,12 +9,10 @@ img = Image.new( 'RGB', (24,32), "black")
 
 def temp_to_col(val):
     hue = (180 - (val * 6)) / 360.0
-    if hue < 0:
-        hue %= 1
-    return tuple([int(c*255) for c in colorsys.hsv_to_rgb(hue, 1.0, 1.0)])
+    return tuple([int(c*255) for c in colorsys.hsv_to_rgb(hue % 1, 1.0, 1.0)])
 
-#def temp_to_col(val):
-#    return tuple([int(c*255) for c in colorsys.hsv_to_rgb(1.0, 0.0, val/50.0)])
+# def temp_to_col(val):
+#     return tuple([int(c*255) for c in colorsys.hsv_to_rgb(1.0, 0.0, val/50.0)])
 
 
 x.setup(16)
