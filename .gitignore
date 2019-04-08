@@ -3,7 +3,7 @@
 *.a
 *.so
 python/*.gif
-examles/fbuf
+examples/fbuf
 examples/step
 examples/test
 examples/interp

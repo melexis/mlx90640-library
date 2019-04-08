@@ -74,12 +74,13 @@ SDL2 for `sdlscale` example:
 sudo apt install libsdl2-dev
 ```
 
-Then just `make <examplename>` and `sudo ./test` or one of the other examples listed below:
+Then just `make examples/<examplename>` and `sudo examples/<exampleame>` for one of the examples listed below:
 
 # fbuf
 
 ```
-sudo ./fbuf
+make examples/fbuf
+sudo examples/fbuf
 ```
 
 This example uses direct-to-framebuffer rendering and black-blue-green-yellow-red-purple-white false colouring.
@@ -89,7 +90,8 @@ If you gave issues with the output image, set "`IMAGE_SCALE`" to a smaller numbe
 # interp
 
 ```
-sudo ./interp
+make examples/interp
+sudo examples/interp
 ```
 
 This example uses direct-to-framebuffer rendering and black-blue-green-yellow-red-purple-white false colouring.
@@ -100,9 +102,9 @@ If you have issues with the output image, set "`IMAGE_SCALE`" to a smaller numbe
 
 # test
 
-
 ```
-sudo ./test
+make examples/test
+sudo examples/test
 ```
 
 This example draws out to the console using ANSI colours and the full block char.
@@ -112,7 +114,8 @@ To see the actual temperature values, change "`FMT_STRING`" from the block char 
 # step
 
 ```
-sudo ./step
+make examples/step
+sudo examples/step
 ```
 
 Attempt to run in step by step mode (experimental)
@@ -126,7 +129,8 @@ Hit Spacebar to change from aspect-ratio correct to full-screen-stretched modes.
 Hit Escape to exit.
 
 ```
-sudo ./sdlscale
+make examples/sdlscale
+sudo examples/sdlscale
 ```
 
 Requires SDL2 libraries:
@@ -135,4 +139,4 @@ Requires SDL2 libraries:
 sudo apt install libsdl2-dev
 ```
 
-On Raspbian Lite you may wish to buildi SDL2 from source with X support disabled to avoid pulling in ~200MB of dependencies. Before configuring/compiling ensure you have `libudev-dev` installed for input support.
+On Raspbian Lite you may wish to build SDL2 from source with X support disabled to avoid pulling in ~200MB of dependencies. Before configuring/compiling ensure you have `libudev-dev` installed for input support.
