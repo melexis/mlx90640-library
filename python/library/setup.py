@@ -53,7 +53,7 @@ classifiers = ['Development Status :: 4 - Beta',
 
 _MLX90640 = Extension(
     '_MLX90640',
-    include_dirs=['../headers'],
+    include_dirs=['../../headers'],
     sources=sources,
     swig_opts=['-threads'],
     extra_link_args=['-lbcm2835']
