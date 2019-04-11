@@ -37,7 +37,9 @@ try:
             print("Got {} bytes of data!".format(size))
 
             # Convert the raw frame bytes into a PIL image and resize
-            image = Image.frombytes('RGB', (24, 32), frame)
+            image = Image.frombytes('RGB', (32, 24), frame)
+            # image = image.rotate(-90, expand=True)
+            image = image.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
             image = image.resize(OUTPUT_SIZE, Image.NEAREST)
 
             frames.append(image)
