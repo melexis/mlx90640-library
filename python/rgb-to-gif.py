@@ -28,7 +28,7 @@ Press Ctrl+C to save & exit!
 """)
 
 try:
-    with subprocess.Popen(["sudo", "../rawrgb"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as camera:
+    with subprocess.Popen(["sudo", RAW_RGB_PATH], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as camera:
         while True:
             # Despite the docs, we use read() here since we want to poll
             # the process for chunks of 2304 bytes, each of which is a frame
