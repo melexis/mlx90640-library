@@ -7,6 +7,7 @@ from PIL import Image
 import os
 
 MAX_FRAMES = 50           # Large sizes get big quick!
+SKIP_FRAMES = 2           # Frames to skip before starting recording
 OUTPUT_SIZE = (240, 320)  # Multiple of (24, 32)
 FPS = 4                   # Should match the FPS value in examples/rawrgb.cpp
 RAW_RGB_PATH = "../examples/rawrgb"
@@ -17,10 +18,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--frames', type=int, help='Number of frames to capture.', default=MAX_FRAMES)
 parser.add_argument('--fps', type=int, help='Framerate to capture. Default: 4',
                     choices=[1, 2, 4, 8, 16, 32, 64], default=FPS)
+parser.add_argument('--skip', type=int, help='Frames to skip. Default: 2', default=SKIP_FRAMES)
 args = parser.parse_args()
 
 fps = args.fps
 max_frames = args.frames
+skip_frames = args.skip
 
 if not os.path.isfile(RAW_RGB_PATH):
     raise RuntimeError("{} doesn't exist, did you forget to run \"make\"?".format(RAW_RGB_PATH))
@@ -44,6 +47,11 @@ try:
             frame = camera.stdout.read(2304)
             size = len(frame)
             print("Got {} bytes of data!".format(size))
+
+            if skip_frames > 0:
+                time.sleep(1.0 / fps)
+                skip_frames -= 1
+                continue
 
             # Convert the raw frame bytes into a PIL image and resize
             image = Image.frombytes('RGB', (32, 24), frame)
