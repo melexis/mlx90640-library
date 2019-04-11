@@ -56,8 +56,6 @@ try:
             # Convert the raw frame bytes into a PIL image and resize
             image = Image.frombytes('RGB', (32, 24), frame)
             # image = image.rotate(-90, expand=True)
-            image = image.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
-            image = image.resize(OUTPUT_SIZE, Image.NEAREST)
 
             frames.append(image)
             print("Frames: {}".format(len(frames)))
@@ -70,6 +68,12 @@ except KeyboardInterrupt:
     pass
 finally:
     if len(frames) > 1:
+        for index, image in enumerate(frames):
+            image = image.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
+            image = image.resize(OUTPUT_SIZE, Image.NEAREST)
+            image = image.convert("P", dither=False, palette=Image.ADAPTIVE, colors=32)
+            frames[index] = image
+
         filename = 'mlx90640-{}.gif'.format(
             datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
         print("Saving {} with {} frames.".format(filename, len(frames)))
