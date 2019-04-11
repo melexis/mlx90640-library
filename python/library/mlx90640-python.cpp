@@ -100,7 +100,9 @@ extern "C" int setup(int fps){
 			baudrate = 1000000;
 			break;
 		default:
+#ifdef DEBUG
 			printf("Unsupported framerate: %d", fps);
+#endif
 			return 1;
 	}
 	MLX90640_SetChessMode(MLX_I2C_ADDR);
@@ -136,16 +138,22 @@ extern "C" float * get_frame(void){
 	retries=10;
 
 	while (retries-- && (!subpages[0] || !subpages[1])){
+#ifdef DEBUG
 		printf("Retries: %d \n", retries);
+#endif
 		auto start = std::chrono::system_clock::now();
 		
 		MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
+#ifdef DEBUG
 		printf("Got data for page %d\n", MLX90640_GetSubPageNumber(frame));
+#endif
 		subpage = MLX90640_GetSubPageNumber(frame);
 
 		subpages[subpage] = 1;
 
+#ifdef DEBUG
 		printf("Converting data for page %d\n", subpage);
+#endif
 
 		eTa = MLX90640_GetTa(frame, &mlx90640);
 		MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
@@ -157,7 +165,9 @@ extern "C" float * get_frame(void){
 		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 		std::this_thread::sleep_for(std::chrono::microseconds(frame_time - elapsed));
 	}
+#ifdef DEBUG
 	printf("Finishing\n");
+#endif
 
 	bcm2835_i2c_end();
 
