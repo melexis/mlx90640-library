@@ -2,16 +2,25 @@
 import time
 from datetime import datetime
 import subprocess
-import sys
-from PIL import Image, ImageSequence
+import argparse
+from PIL import Image
 import os
 
 MAX_FRAMES = 50           # Large sizes get big quick!
 OUTPUT_SIZE = (240, 320)  # Multiple of (24, 32)
-FPS = 16                  # Should match the FPS value in examples/rawrgb.cpp
+FPS = 4                   # Should match the FPS value in examples/rawrgb.cpp
 RAW_RGB_PATH = "../examples/rawrgb"
 
 frames = []
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--frames', type=int, help='Number of frames to capture.', default=MAX_FRAMES)
+parser.add_argument('--fps', type=int, help='Framerate to capture. Default: 4',
+                    choices=[1, 2, 4, 8, 16, 32, 64], default=FPS)
+args = parser.parse_args()
+
+fps = args.fps
+max_frames = args.frames
 
 if not os.path.isfile(RAW_RGB_PATH):
     raise RuntimeError("{} doesn't exist, did you forget to run \"make\"?".format(RAW_RGB_PATH))
@@ -28,7 +37,7 @@ Press Ctrl+C to save & exit!
 """)
 
 try:
-    with subprocess.Popen(["sudo", RAW_RGB_PATH], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as camera:
+    with subprocess.Popen(["sudo", RAW_RGB_PATH, "{}".format(fps)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as camera:
         while True:
             # Despite the docs, we use read() here since we want to poll
             # the process for chunks of 2304 bytes, each of which is a frame
@@ -44,10 +53,10 @@ try:
 
             frames.append(image)
             print("Frames: {}".format(len(frames)))
-            if len(frames) == MAX_FRAMES:
+            if len(frames) == max_frames:
                 break
 
-            time.sleep(1.0 / FPS)
+            time.sleep(1.0 / fps)
 
 except KeyboardInterrupt:
     pass
@@ -60,5 +69,5 @@ finally:
             filename,
             save_all=True,
             append_images=frames[1:],
-            duration=1000 // FPS,
-            loop=0)    
+            duration=1000 // fps,
+            loop=0)
