@@ -5,6 +5,8 @@
 #include <chrono>
 #include <thread>
 #include <math.h>
+#include <stdlib.h>
+#include <errno.h>
 #include "headers/MLX90640_API.h"
 
 /*
@@ -125,7 +127,7 @@ void put_pixel_false_colour(char *image, int x, int y, double v) {
 
 }
 
-int main(){
+int main(int argc, char *argv[]){
 	
     static uint16_t eeMLX90640[832];
     float emissivity = 0.8;
@@ -134,12 +136,24 @@ int main(){
     static float mlx90640To[768];
     float eTa;
     static uint16_t data[768*sizeof(float)];
+    static int fps = FPS;
+    static long frame_time_micros = FRAME_TIME_MICROS;
+    char *p;
 
-    auto frame_time = std::chrono::microseconds(FRAME_TIME_MICROS + OFFSET_MICROS);
+    if(argc > 1){
+        fps = strtol(argv[1], &p, 0);
+        if (errno !=0 || *p != '\0') {
+            fprintf(stderr, "Invalid framerate\n");
+            return 1;
+        }
+        frame_time_micros = 1000000/fps;
+    }
+
+    auto frame_time = std::chrono::microseconds(frame_time_micros + OFFSET_MICROS);
 
     MLX90640_SetDeviceMode(MLX_I2C_ADDR, 0);
     MLX90640_SetSubPageRepeat(MLX_I2C_ADDR, 0);
-    switch(FPS){
+    switch(fps){
         case 1:
             MLX90640_SetRefreshRate(MLX_I2C_ADDR, 0b001);
             break;
@@ -162,7 +176,7 @@ int main(){
             MLX90640_SetRefreshRate(MLX_I2C_ADDR, 0b111);
             break;
         default:
-            fprintf(stderr, "Unsupported framerate: %d", FPS);
+            fprintf(stderr, "Unsupported framerate: %d\n", fps);
             return 1;
     }
     MLX90640_SetChessMode(MLX_I2C_ADDR);
