@@ -55,7 +55,6 @@ try:
 
             # Convert the raw frame bytes into a PIL image and resize
             image = Image.frombytes('RGB', (32, 24), frame)
-            # image = image.rotate(-90, expand=True)
 
             frames.append(image)
             print("Frames: {}".format(len(frames)))
@@ -68,10 +67,16 @@ except KeyboardInterrupt:
     pass
 finally:
     if len(frames) > 1:
+        master = Image.new('RGB', (32, 24 * len(frames)))
         for index, image in enumerate(frames):
+            master.paste(image, (0, 24 * index))
+        master = master.convert('P', dither=False, palette=Image.ADAPTIVE, colors=256)
+
+        for index, image in enumerate(frames):
+            image = image.convert('P', dither=False, palette=master.palette)
+            # image = image.quantize(method=3, palette=master)
             image = image.transpose(Image.ROTATE_270).transpose(Image.FLIP_LEFT_RIGHT)
             image = image.resize(OUTPUT_SIZE, Image.NEAREST)
-            image = image.convert("P", dither=False, palette=Image.ADAPTIVE, colors=32)
             frames[index] = image
 
         filename = 'mlx90640-{}.gif'.format(
@@ -82,4 +87,7 @@ finally:
             save_all=True,
             append_images=frames[1:],
             duration=1000 // fps,
-            loop=0)
+            loop=0,
+            include_color_table=True,
+            optimize=True,
+            palette=master.palette.getdata())
