@@ -18,6 +18,7 @@
 #include <MLX90640_API.h>
 #include <math.h>
 #include <stdio.h>
+#include <chrono>
 
 void ExtractVDDParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
 void ExtractPTATParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
@@ -123,7 +124,8 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     uint16_t statusRegister;
     int error = 1;
     uint8_t cnt = 0;
-    
+
+    auto t_start = std::chrono::system_clock::now();
     dataReady = 0;
     while(dataReady == 0)
     {
@@ -133,42 +135,49 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
             return error;
         }    
         dataReady = statusRegister & 0x0008;
-    }       
-        
+
+	auto t_end = std::chrono::system_clock::now();
+	auto t_elapsed = std::chrono::duration_cast<std::chrono::seconds>(t_end - t_start);
+	if (t_elapsed.count() > 5) {
+		printf("frameData timeout error waiting for dataReady \n");
+		return -1;
+	}
+    } 
+
     while(dataReady != 0 && cnt < 5)
-    { 
+    {
         error = MLX90640_I2CWrite(slaveAddr, 0x8000, 0x0030);
         if(error == -1)
         {
             return error;
         }
-            
+
         error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
         if(error != 0)
         {
             printf("frameData read error \n");
             return error;
         }
-                   
+
         error = MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
         if(error != 0)
         {
             return error;
-        }    
+        }
         dataReady = statusRegister & 0x0008;
         cnt = cnt + 1;
     }
-    
+
     if(cnt > 4)
     {
         fprintf(stderr, "cnt > 4 error \n");
-        return -8;
-    }    
+        // return -8;
+    }
     //printf("count: %d \n", cnt); 
     error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
     frameData[832] = controlRegister1;
     frameData[833] = statusRegister & 0x0001;
-    
+
     if(error != 0)
     {
         return error;
