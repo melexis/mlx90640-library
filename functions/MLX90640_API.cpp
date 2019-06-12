@@ -702,7 +702,7 @@ void MLX90640_BadPixelsCorrection(uint16_t *pixels, float *to, int mode, paramsM
     uint8_t column;
     
     pix = 0;
-    while(pixels[pix]< 65535)
+    while(pixels[pix]< 0xFFFF)
     {
         line = pixels[pix]>>5;
         column = pixels[pix] - (line<<5);
@@ -1318,7 +1318,7 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
         mlx90640->brokenPixels[pixCnt] = 0xFFFF;
         mlx90640->outlierPixels[pixCnt] = 0xFFFF;
     }
-        
+ 
     pixCnt = 0;    
     while (pixCnt < 768 && brokenPixCnt < 5 && outlierPixCnt < 5)
     {
