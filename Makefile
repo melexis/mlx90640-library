@@ -80,7 +80,7 @@ clean:
 	rm -f *.so
 	rm -f *.a
 
-install: libMLX90640_API.a
+install: libMLX90640_API.a libMLX90640_API.so
 	install -d $(DESTDIR)$(PREFIX)/lib/
 	install -m 644 libMLX90640_API.a $(DESTDIR)$(PREFIX)/lib/
 	install -m 644 libMLX90640_API.so $(DESTDIR)$(PREFIX)/lib/
