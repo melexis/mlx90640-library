@@ -5,8 +5,8 @@
 #include <chrono>
 #include <thread>
 #include <math.h>
-#include "../headers/MLX90640_API.h"
-#include "bcm2835.h"
+#include "MLX90640/MLX90640_API.h"
+#include "MLX90640/MLX90640_I2C_Driver.h"
 
 #define MLX_I2C_ADDR 0x33
 
@@ -27,43 +27,7 @@ float eTa;
 // static uint16_t data[768*sizeof(float)];
 auto frame_time = std::chrono::microseconds(0);
 
-int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
-{
-	int result;
-
-	char cmd[2] = {(char)(startAddress >> 8), (char)(startAddress & 0xFF)};
-
-	char buf[1664];
-	uint16_t *p = data;
-
-	bcm2835_i2c_setSlaveAddress(slaveAddr);
-	result = bcm2835_i2c_write_read_rs(cmd, 2, buf, nMemAddressRead*2);
-
-	for(int count = 0; count < nMemAddressRead; count++){
-	int i = count << 1;
-		*p++ = ((uint16_t)buf[i] << 8) | buf[i+1];
-	}
-	return result;
-} 
-
-void MLX90640_I2CFreqSet(int freq)
-{
-}
-
-int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
-{
-	int result;
-	char cmd[4] = {(char)(writeAddress >> 8), (char)(writeAddress & 0x00FF), (char)(data >> 8), (char)(data & 0x00FF)};
-	bcm2835_i2c_setSlaveAddress(slaveAddr);
-	result = bcm2835_i2c_write(cmd, 4);
-	return result;
-}
-
 extern "C" int setup(int fps){
-	bcm2835_init();
-	bcm2835_i2c_begin();
-	bcm2835_i2c_set_baudrate(400000);
-
 	MLX90640_SetDeviceMode(MLX_I2C_ADDR, 0);
 	MLX90640_SetSubPageRepeat(MLX_I2C_ADDR, 0);
 
@@ -109,22 +73,17 @@ extern "C" int setup(int fps){
 	MLX90640_DumpEE(MLX_I2C_ADDR, eeMLX90640);
 	MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
 
-	bcm2835_i2c_end();
-
 	return 0;
 }
 
 extern "C" void cleanup(void){
-	bcm2835_close();
+	//nothing...
 }
 
 extern "C" float * get_frame(void){
 	int retries = 6;
 	int subpage;
 	bool subpages[2] = {0,0};
-
-	bcm2835_i2c_begin();
-	bcm2835_i2c_set_baudrate(baudrate);
 
 	// Sync up with the cameras framerate by throwing data away
 	while(retries--){
@@ -168,8 +127,6 @@ extern "C" float * get_frame(void){
 #ifdef DEBUG
 	printf("Finishing\n");
 #endif
-
-	bcm2835_i2c_end();
 
 	return mlx90640To;
 }
