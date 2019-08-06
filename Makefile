@@ -1,4 +1,4 @@
-I2C_MODE = RPI
+I2C_MODE = LINUX
 I2C_LIBS = -lbcm2835
 SRC_DIR = examples/src/
 BUILD_DIR = examples/
@@ -8,11 +8,16 @@ examples = test rawrgb step fbuf interp video hotspot sdlscale
 examples_objects = $(addsuffix .o,$(addprefix $(SRC_DIR), $(examples)))
 examples_output = $(addprefix $(BUILD_DIR), $(examples))
 
+#PREFIX is environment variable, but if it is not set, then set default value
+ifeq ($(PREFIX),)
+	PREFIX = /usr/local
+endif
+
 ifeq ($(I2C_MODE), LINUX)
 	I2C_LIBS =
 endif
 
-all: examples
+all: libMLX90640_API.a libMLX90640_API.so examples
 
 examples: $(examples_output)
 
@@ -74,3 +79,10 @@ clean:
 	rm -f *.o
 	rm -f *.so
 	rm -f *.a
+
+install: libMLX90640_API.a
+	install -d $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 libMLX90640_API.a $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 libMLX90640_API.so $(DESTDIR)$(PREFIX)/lib/
+	install -d $(DESTDIR)$(PREFIX)/include/MLX90640/
+	install -m 644 headers/*.h $(DESTDIR)$(PREFIX)/include/MLX90640/
