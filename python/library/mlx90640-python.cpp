@@ -25,14 +25,12 @@ uint16_t frame[834];
 static float mlx90640To[768];
 float eTa;
 // static uint16_t data[768*sizeof(float)];
-auto frame_time = std::chrono::microseconds(0);
 
 extern "C" int setup(int fps){
 	MLX90640_SetDeviceMode(MLX_I2C_ADDR, 0);
 	MLX90640_SetSubPageRepeat(MLX_I2C_ADDR, 0);
 
 	int t = (1000000 / fps) + OFFSET_MICROS;
-	frame_time = std::chrono::microseconds(t);
 
 	switch(fps){
 		case 1:
@@ -85,15 +83,6 @@ extern "C" float * get_frame(void){
 	int subpage;
 	bool subpages[2] = {0,0};
 
-	// Sync up with the cameras framerate by throwing data away
-	while(retries--){
-		auto start = std::chrono::system_clock::now();
-		MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
-		auto end = std::chrono::system_clock::now();
-		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-		std::this_thread::sleep_for(std::chrono::microseconds(frame_time - elapsed));
-	}
-	
 	retries=10;
 
 	while (retries-- && (!subpages[0] || !subpages[1])){
@@ -101,7 +90,7 @@ extern "C" float * get_frame(void){
 		printf("Retries: %d \n", retries);
 #endif
 		auto start = std::chrono::system_clock::now();
-		
+
 		MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
 #ifdef DEBUG
 		printf("Got data for page %d\n", MLX90640_GetSubPageNumber(frame));
@@ -117,12 +106,8 @@ extern "C" float * get_frame(void){
 		eTa = MLX90640_GetTa(frame, &mlx90640);
 		MLX90640_CalculateTo(frame, &mlx90640, emissivity, eTa, mlx90640To);
 
-        MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
-        MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
-
-		auto end = std::chrono::system_clock::now();
-		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-		std::this_thread::sleep_for(std::chrono::microseconds(frame_time - elapsed));
+		MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
+		MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
 	}
 #ifdef DEBUG
 	printf("Finishing\n");
