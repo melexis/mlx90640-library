@@ -15,3 +15,13 @@ This script will run for 50 frames by default, and save the result to a datestam
 ## Experimental Library
 
 An experimental python library can be found in the library/ folder along with a simple `test.py` script.
+
+The library needs the "main" lib for MLX90640 to be installed in the system, it will then use the I2C-mode compiled into this library.
+
+Build-modes are:
+
+* `make` or `make all`: default, build the library using Python 2 bindings
+* `make python3`: build the library telling swig to create Python 3 bindings
+* `make install`: install the library into the system
+
+The makefile allways calls the `python` binary without specified an explicit version. Use `sudo update-alternatives --config python` to set the *correct* default value (Python 2 or 3)
