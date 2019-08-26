@@ -26,11 +26,12 @@ static float mlx90640To[768];
 float eTa;
 // static uint16_t data[768*sizeof(float)];
 
-extern "C" int setup(int fps){
+//extern "C" 
+int setup(int fps){
 	MLX90640_SetDeviceMode(MLX_I2C_ADDR, 0);
 	MLX90640_SetSubPageRepeat(MLX_I2C_ADDR, 0);
 
-	int t = (1000000 / fps) + OFFSET_MICROS;
+	//int t = (1000000 / fps) + OFFSET_MICROS;
 
 	switch(fps){
 		case 1:
@@ -74,11 +75,13 @@ extern "C" int setup(int fps){
 	return 0;
 }
 
-extern "C" void cleanup(void){
+//extern "C" 
+void cleanup(void){
 	//nothing...
 }
 
-extern "C" float * get_frame(void){
+//extern "C" 
+float * get_frame(void){
 	int retries = 6;
 	int subpage;
 	bool subpages[2] = {0,0};
@@ -89,7 +92,7 @@ extern "C" float * get_frame(void){
 #ifdef DEBUG
 		printf("Retries: %d \n", retries);
 #endif
-		auto start = std::chrono::system_clock::now();
+		//auto start = std::chrono::system_clock::now();
 
 		MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
 #ifdef DEBUG
