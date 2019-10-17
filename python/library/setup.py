@@ -9,7 +9,7 @@ from setuptools.command.sdist import sdist
 from distutils.spawn import find_executable
 from glob import glob
 
-sources = ['../../functions/MLX90640_API.cpp', 'mlx90640-python.cpp']
+sources = ['mlx90640-python.cpp']
 # If we have swig, use it.  Otherwise, use the pre-generated
 # wrapper from the source distribution.
 if find_executable('swig'):
@@ -20,8 +20,7 @@ elif os.path.exists('MLX90640_wrap.c'):
     sources += ['MLX90640_wrap.c']
 else:
     print("Error:  Building this module requires either that swig is installed\n"
-          "        (e.g., 'sudo apt install swig') or that MLX90640_wrap.c from the\n"
-          "        source distribution (on pypi) is available.")
+          "        (e.g., 'sudo apt install swig') or that MLX90640_wrap.c is available.\n")
     sys.exit(1)
 
 # Fix so that build_ext runs before build_py
@@ -53,10 +52,13 @@ classifiers = ['Development Status :: 4 - Beta',
 
 _MLX90640 = Extension(
     '_MLX90640',
-    include_dirs=['../../headers'],
+    #We now require the base library to be installed, hence: no special header dirs needed!
+    #include_dirs=['../../headers'],
     sources=sources,
     swig_opts=['-threads'],
-    extra_link_args=['-lbcm2835']
+    #extra_link_args=['-lbcm2835']
+    #instead of using bcm2835 I2C driver all the time, use the one linked into the library
+    extra_link_args=['-lMLX90640_API']
 )
 
 setup(

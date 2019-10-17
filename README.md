@@ -6,6 +6,7 @@ MLX90640 library functions
 ** EXPERIMENTAL **
 
 This port uses either generic Linux I2C or the  bcm2835 library.
+Upon building, the mode is set with the I2C_MODE property, i.e. `make I2C_MODE=LINUX` or `make I2C_MODE=RPI`. The default is LINUX, without the need for the bcm2835 library or root access.
 
 ### Generic Linux I2C Mode
 
@@ -74,9 +75,20 @@ SDL2 for `sdlscale` example:
 sudo apt install libsdl2-dev
 ```
 
-Then just `make examples/<examplename>` and `sudo examples/<exampleame>` for one of the examples listed below:
+# Building
 
-# fbuf
+After installing the dependencies, you can build the library. Build-modes are:
+
+* `make` or `make all`: build the library and all dependencies. Default is to use standard linux I2C-Drivers, specify Raspberry Pi driver with `make I2C_MODE=RPI`
+* `make examples`: only build examples, see below
+* `sudo make install`: install libraries and headers into `$PREFIX`, default is `/usr/local`
+
+Afterwards you can run the examples or build the python binding, see readme in the subfolder.
+If you built the examples or library using the native bcm2835 I2C-Driver, you need to run all applications and examples as root.
+Hence, `sudo examples/<exampleame>` for one of the examples listed below, or without `sudo` when using the standard Linux driver.
+
+# Examples
+## fbuf
 
 ```
 make examples/fbuf
@@ -87,7 +99,7 @@ This example uses direct-to-framebuffer rendering and black-blue-green-yellow-re
 
 If you gave issues with the output image, set "`IMAGE_SCALE`" to a smaller number.
 
-# interp
+## interp
 
 ```
 make examples/interp
@@ -100,7 +112,7 @@ It also has 2x bicubic resize filter.
 
 If you have issues with the output image, set "`IMAGE_SCALE`" to a smaller number.
 
-# test
+## test
 
 ```
 make examples/test
@@ -111,7 +123,7 @@ This example draws out to the console using ANSI colours and the full block char
 
 To see the actual temperature values, change "`FMT_STRING`" from the block char to the float format.
 
-# step
+## step
 
 ```
 make examples/step
@@ -120,7 +132,7 @@ sudo examples/step
 
 Attempt to run in step by step mode (experimental)
 
-# sdlscale
+## sdlscale
 
 Displays the MLX90640 sensor full-screen using hardware acceleration in SDL2.
 

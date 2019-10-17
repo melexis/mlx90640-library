@@ -7,7 +7,6 @@
 #include <math.h>
 #include "headers/MLX90640_API.h"
 #include "lib/fb.h"
-#include "bcm2835.h"
 #include <math.h>
 
 extern "C" {
@@ -293,9 +292,7 @@ void put_pixel_false_colour(int x, int y, double v) {
 }
 
 void pulse(){
-	bcm2835_gpio_write(RPI_BPLUS_GPIO_J8_07, 1);
 	std::this_thread::sleep_for(std::chrono::nanoseconds(50));
-	bcm2835_gpio_write(RPI_BPLUS_GPIO_J8_07, 0);
 }
 
 int main(){
@@ -310,8 +307,6 @@ int main(){
 	auto frame_time = std::chrono::microseconds(FRAME_TIME_MICROS + OFFSET_MICROS);
 
 	fb_init();
-	bcm2835_init();
-	bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_07, BCM2835_GPIO_FSEL_OUTP);
 
 	MLX90640_SetDeviceMode(MLX_I2C_ADDR, 0);
 	MLX90640_SetSubPageRepeat(MLX_I2C_ADDR, 0);
@@ -400,6 +395,5 @@ int main(){
 
 	video_encode_end();
 	fb_cleanup();
-	bcm2835_close();
 	return 0;
 }
