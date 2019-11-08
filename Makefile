@@ -87,3 +87,4 @@ install: libMLX90640_API.a libMLX90640_API.so
 	install -m 644 libMLX90640_API.so $(DESTDIR)$(PREFIX)/lib/
 	install -d $(DESTDIR)$(PREFIX)/include/MLX90640/
 	install -m 644 headers/*.h $(DESTDIR)$(PREFIX)/include/MLX90640/
+	ldconfig

@@ -1,16 +1,27 @@
-all:
-	swig3.0 -c++ -python MLX90640.i
-	python setup.py build
+PYTHON := python3
 
-python3:
-	swig3.0 -py3 -c++ -python MLX90640.i
-	python3 setup.py build
+python_version_str := $(shell ${PYTHON} --version 2>&1)
+python_version_full := $(wordlist 2,4,$(subst ., ,${python_version_str}))
+python_version_major := $(word 1, ${python_version_full})
+
+ifeq (${python_version_major}, 3)
+	SWIG_ARGS := -py3
+endif
+
+all:
+	@echo ""
+	@echo "Using: ${python_version_str} (${PYTHON})"
+	@echo ""
+	@echo "make build PYTHON=<python binary>   - Build using specified Python"
+	@echo "make install PYTHON=<python binary> - Install using specified Python"
+	@echo ""
+
+build:
+	swig3.0 ${SWIG_ARGS} -c++ -python MLX90640.i
+	${PYTHON} setup.py build
 
 install:
-	python setup.py install
-
-install3:
-	python3 setup.py install
+	${PYTHON} setup.py install
 
 clean:
 	rm -rf build/
