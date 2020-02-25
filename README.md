@@ -1,5 +1,8 @@
 # mlx90640-library
-MLX90640 library functions
+
+This Python wrapper of the Melexis MLX90640 library was written for use with the Raspberry Pi and our [MLX90640 breakout](https://shop.pimoroni.com/products/mlx90640-thermal-camera-breakout). While you are free to use this software with whatever combination of device you choose, we unfortunately lack the resources to test and support any other combinations.
+
+** Warning: ** We have reason to believe that using this library in conjunction with a Jetson Nano could damage your device, please see: https://github.com/pimoroni/mlx90640-library/issues/38
 
 ## Raspberry Pi Users
 
