@@ -55,7 +55,7 @@ _MLX90640 = Extension(
     #We now require the base library to be installed, hence: no special header dirs needed!
     #include_dirs=['../../headers'],
     sources=sources,
-    swig_opts=['-threads'],
+    swig_opts=['-threads', '-c++'],
     #extra_link_args=['-lbcm2835']
     #instead of using bcm2835 I2C driver all the time, use the one linked into the library
     extra_link_args=['-lMLX90640_API']
