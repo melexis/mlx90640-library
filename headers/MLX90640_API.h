@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _MLX640_API_H_
-#define _MLX640_API_H_
+#ifndef _MLX90640_API_H_
+#define _MLX90640_API_H_
 
 #define SCALEALPHA 0.000001
     
@@ -51,6 +51,8 @@ typedef struct
     } paramsMLX90640;
     
     int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
+    int MLX90640_SynchFrame(uint8_t slaveAddr);
+    int MLX90640_TriggerMeasurement(uint8_t slaveAddr);
     int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
     int MLX90640_ExtractParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
     float MLX90640_GetVdd(uint16_t *frameData, const paramsMLX90640 *params);
