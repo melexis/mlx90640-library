@@ -35,21 +35,26 @@ int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640);
 int CheckAdjacentPixels(uint16_t pix1, uint16_t pix2);  
 float GetMedian(float *values, int n);
 int IsPixelBad(uint16_t pixel,paramsMLX90640 *params);
+int ValidateFrameData(uint16_t *frameData);
+int ValidateAuxData(uint16_t *auxData);
   
 int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
 {
      return MLX90640_I2CRead(slaveAddr, 0x2400, 832, eeData);
 }
 
-int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
+int MLX90640_SynchFrame(uint8_t slaveAddr)
 {
-    uint16_t dataReady = 1;
-    uint16_t controlRegister1;
+    uint16_t dataReady = 0;
     uint16_t statusRegister;
     int error = 1;
-    uint8_t cnt = 0;
     
-    dataReady = 0;
+    error = MLX90640_I2CWrite(slaveAddr, 0x8000, 0x0030);
+    if(error == -1)
+    {
+        return error;
+    }
+    
     while(dataReady == 0)
     {
         error = MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
@@ -58,36 +63,90 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
             return error;
         }    
         dataReady = statusRegister & 0x0008;
-    }       
-        
-    while(dataReady != 0 && cnt < 5)
-    { 
-        error = MLX90640_I2CWrite(slaveAddr, 0x8000, 0x0030);
-        if(error == -1)
-        {
-            return error;
-        }
-            
-        error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
-        if(error != 0)
-        {
-            return error;
-        }
-                   
+    }      
+    
+   return 0;   
+}
+
+int MLX90640_TriggerMeasurement(uint8_t slaveAddr)
+{
+    int error = 1;
+    uint16_t ctrlReg;
+    
+    error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &ctrlReg);
+    
+    if ( error != 0) 
+    {
+        return error;
+    }    
+                                                
+    ctrlReg |= 0x8000;
+    error = MLX90640_I2CWrite(slaveAddr, 0x800D, ctrlReg);
+    
+    if ( error != 0)
+    {
+        return error;
+    }    
+    
+    error = MLX90640_I2CGeneralReset();
+    
+    if ( error != 0)
+    {
+        return error;
+    }    
+    
+    error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &ctrlReg);
+    
+    if ( error != 0)
+    {
+        return error;
+    }    
+    
+    if ((ctrlReg & 0x8000) != 0)
+    {
+        return -9;
+    }
+    
+    return 0;    
+}
+    
+int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
+{
+    uint16_t dataReady = 0;
+    uint16_t controlRegister1;
+    uint16_t statusRegister;
+    int error = 1;
+    uint16_t data[64];
+    uint8_t cnt = 0;
+    
+    while(dataReady == 0)
+    {
         error = MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
         if(error != 0)
         {
             return error;
         }    
         dataReady = statusRegister & 0x0008;
-        cnt = cnt + 1;
-    }
+    }      
     
-    if(cnt > 4)
+    error = MLX90640_I2CWrite(slaveAddr, 0x8000, 0x0030);
+    if(error == -1)
     {
-        return -8;
-    }    
+        return error;
+    }
+                     
+    error = MLX90640_I2CRead(slaveAddr, 0x0400, 768, frameData); 
+    if(error != 0)
+    {
+        return error;
+    }                       
     
+    error = MLX90640_I2CRead(slaveAddr, 0x0700, 64, data); 
+    if(error != 0)
+    {
+        return error;
+    }     
+        
     error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
     frameData[832] = controlRegister1;
     frameData[833] = statusRegister & 0x0001;
@@ -97,9 +156,76 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
         return error;
     }
     
+    error = ValidateAuxData(data);
+    if(error == 0)
+    {
+        for(cnt=0; cnt<64; cnt++)
+        {
+            frameData[cnt+768] = data[cnt];
+        }
+    }        
+    
+    error = ValidateFrameData(frameData);
+    if (error != 0)
+    {
+        return error;
+    }
+    
     return frameData[833];    
 }
 
+int ValidateFrameData(uint16_t *frameData)
+{
+    uint8_t line = 0;
+    
+    for(int i=0; i<768; i+=32)
+    {
+        if((frameData[i] == 0x7FFF) && (line%2 == frameData[833])) return -8;
+        line = line + 1;
+    }    
+        
+    return 0;    
+}
+
+int ValidateAuxData(uint16_t *auxData)
+{
+    
+    if(auxData[0] == 0x7FFF) return -8;    
+    
+    for(int i=8; i<19; i++)
+    {
+        if(auxData[i] == 0x7FFF) return -8;
+    }
+    
+    for(int i=20; i<23; i++)
+    {
+        if(auxData[i] == 0x7FFF) return -8;
+    }
+    
+    for(int i=24; i<33; i++)
+    {
+        if(auxData[i] == 0x7FFF) return -8;
+    }
+    
+    for(int i=40; i<51; i++)
+    {
+        if(auxData[i] == 0x7FFF) return -8;
+    }
+    
+    for(int i=52; i<55; i++)
+    {
+        if(auxData[i] == 0x7FFF) return -8;
+    }
+    
+    for(int i=56; i<64; i++)
+    {
+        if(auxData[i] == 0x7FFF) return -8;
+    }
+    
+    return 0;
+    
+}
+    
 int MLX90640_ExtractParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
 {
     int error = 0;
@@ -904,7 +1030,7 @@ void ExtractAlphaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     
     alphaScale = 0;
-    while(temp < 32768)
+    while(temp < 32767.4)
     {
         temp = temp*2;
         alphaScale = alphaScale + 1;
@@ -1068,7 +1194,7 @@ void ExtractKtaPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     
     ktaScale1 = 0;
-    while(temp < 64)
+    while(temp < 63.4)
     {
         temp = temp*2;
         ktaScale1 = ktaScale1 + 1;
@@ -1160,7 +1286,7 @@ void ExtractKvPixelParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     }
     
     kvScale = 0;
-    while(temp < 64)
+    while(temp < 63.4)
     {
         temp = temp*2;
         kvScale = kvScale + 1;

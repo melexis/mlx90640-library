@@ -57,6 +57,33 @@ void MLX90640_I2CInit()
 {   
     I2CStop();
 }
+   
+int MLX90640_I2CGeneralReset(void)
+{    
+    int ack;
+    
+    I2CStop();
+    Wait(freqCnt);  
+    I2CStart();
+    Wait(freqCnt);
+    
+    ack = I2CSendByte(0x00);
+    if(ack != 0)
+    {
+        return -1;
+    } 
+    
+    ack = I2CSendByte(0x06);   
+    if(ack != 0)
+    {
+        return -1;
+    }
+    
+    I2CStop();       
+    
+    return 0;
+    
+}
     
 int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress,uint16_t nMemAddressRead, uint16_t *data)
 {
@@ -78,19 +105,19 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress,uint16_t nMemAddre
     I2CStart();
     Wait(freqCnt);
     
-    ack = I2CSendByte(sa)!=0;
+    ack = I2CSendByte(sa);
     if(ack != 0)
     {
         return -1;
     } 
     
-    ack = I2CSendByte(cmd[0])!=0;   
+    ack = I2CSendByte(cmd[0]);   
     if(ack != 0)
     {
         return -1;
     }
     
-    ack = I2CSendByte(cmd[1])!=0;    
+    ack = I2CSendByte(cmd[1]);    
     if(ack != 0)
     {
         return -1;

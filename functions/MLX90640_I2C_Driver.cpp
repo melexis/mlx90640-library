@@ -24,6 +24,29 @@ void MLX90640_I2CInit()
     i2c.stop();
 }
 
+int MLX90640_I2CGeneralReset(void)
+{    
+    int ack;
+    char cmd[2] = {0,0};
+    
+    cmd[0] = 0x00;
+    cmd[1] = 0x06;    
+
+    i2c.stop();
+    wait_us(5);    
+    ack = i2c.write(cmd[0], &cmd[1], 1, 0);
+    
+    if (ack != 0x00)
+    {
+        return -1;
+    }         
+    i2c.stop();   
+    
+    wait_us(50);    
+    
+    return 0;
+}
+
 int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
 {
     uint8_t sa;                           
