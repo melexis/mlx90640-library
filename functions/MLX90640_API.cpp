@@ -912,7 +912,7 @@ void ExtractKsTaParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
 
 void ExtractKsToParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
 {
-    int KsToScale;
+    int32_t KsToScale;
     int8_t step;
     
     step = ((eeData[63] & 0x3000) >> 12) * 10;
