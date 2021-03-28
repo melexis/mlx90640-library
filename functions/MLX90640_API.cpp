@@ -927,7 +927,7 @@ void ExtractKsToParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
     mlx90640->ct[4] = 400;
     
     KsToScale = (eeData[63] & 0x000F) + 8;
-    KsToScale = 1 << KsToScale;
+    KsToScale = 1UL << KsToScale;
     
     mlx90640->ksTo[0] = eeData[61] & 0x00FF;
     mlx90640->ksTo[1] = (eeData[61] & 0xFF00) >> 8;
