@@ -804,9 +804,7 @@ void ExtractVDDParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
 {
     int16_t kVdd;
     int16_t vdd25;
-    
-    kVdd = eeData[51];
-    
+  
     kVdd = (eeData[51] & 0xFF00) >> 8;
     if(kVdd > 127)
     {
