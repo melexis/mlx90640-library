@@ -54,8 +54,8 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     int cnt = 0;
     int i = 0;
     char cmd[2] = {0,0};
-    char i2cData[1664] = {0};
     uint16_t *p;
+    uint8_t *byte_data = (uint8_t*) data;
     
     p = data;
     sa = (slaveAddr << 1);
@@ -72,7 +72,7 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     }
              
     sa = sa | 0x01;
-    ack = i2c.read(sa, i2cData, 2*nMemAddressRead, 0);
+    ack = i2c.read(sa, byte_data, 2*nMemAddressRead, 0);
     
     if (ack != 0x00)
     {
@@ -83,7 +83,9 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     for(cnt=0; cnt < nMemAddressRead; cnt++)
     {
         i = cnt << 1;
-        *p++ = (uint16_t)i2cData[i]*256 + (uint16_t)i2cData[i+1];
+        uint16_t tmp = byte_data[i+1];
+        tmp = (tmp << 8) | byte_data[i];
+        *p++ = tmp;
     }
     
     return 0;   
