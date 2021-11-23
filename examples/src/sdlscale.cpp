@@ -12,11 +12,12 @@
 
 #define MLX_I2C_ADDR 0x33
 
-#define SENSOR_W 24
-#define SENSOR_H 32
+#define SENSOR_W 32
+#define SENSOR_H 24
 
 // Valid frame rates are 1, 2, 4, 8, 16, 32 and 64
 // The i2c baudrate is set to 1mhz to support these
+// NOTE Lower FPS means lower noise -> better image quality
 #define FPS 8
 #define FRAME_TIME_MICROS (1000000/FPS)
 
@@ -200,17 +201,17 @@ int main(void) {
         MLX90640_BadPixelsCorrection((&mlx90640)->brokenPixels, mlx90640To, 1, &mlx90640);
         MLX90640_BadPixelsCorrection((&mlx90640)->outlierPixels, mlx90640To, 1, &mlx90640);
 
-        for(int y = 0; y < SENSOR_W; y++){
-            for(int x = 0; x < SENSOR_H; x++){
-                float val = mlx90640To[SENSOR_H * (SENSOR_W-1-y) + x];
-                put_pixel_false_colour(y, x, val);
+        for(int y = 0; y < SENSOR_H; y++){
+            for(int x = 0; x < SENSOR_W; x++){
+                float val = mlx90640To[(y * SENSOR_W) + x];
+                put_pixel_false_colour(x, y, val);
             }
         }
 
         SDL_UpdateTexture(texture, NULL, (uint8_t *)pixels, SENSOR_W * sizeof(uint32_t));
 
         SDL_SetRenderTarget(renderer, texture_r);
-        SDL_RenderCopyEx(renderer, texture, NULL, NULL, rotation, NULL, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer, texture, NULL, NULL, rotation, NULL, SDL_FLIP_HORIZONTAL);
         SDL_SetRenderTarget(renderer, NULL);
 
         if(preserve_aspect){
