@@ -1,6 +1,5 @@
 I2C_MODE = LINUX
 I2C_LIBS = 
-#I2C_LIBS = -lbcm2835
 SRC_DIR = examples/src/
 BUILD_DIR = examples/
 LIB_DIR = $(SRC_DIR)lib/
@@ -16,6 +15,10 @@ endif
 
 ifeq ($(I2C_MODE), LINUX)
 	I2C_LIBS =
+endif
+
+ifeq ($(I2C_MODE), RPI)
+	I2C_LIBS = -lbcm2835
 endif
 
 all: libMLX90640_API.a libMLX90640_API.so examples
