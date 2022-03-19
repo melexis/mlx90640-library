@@ -69,7 +69,9 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     memset(buf, 0, nMemAddressRead * 2);
 
     if (ioctl(i2c_fd, I2C_RDWR, &i2c_messageset) < 0) {
+        #ifdef DEBUG
         printf("I2C Read Error!\n");
+        #endif
         return -1;
     }
 
@@ -102,7 +104,9 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
     i2c_messageset[0].nmsgs = 1;
 
     if (ioctl(i2c_fd, I2C_RDWR, &i2c_messageset) < 0) {
+        #ifdef DEBUG
         printf("I2C Write Error!\n");
+        #endif
         return -1;
     }
 

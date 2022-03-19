@@ -139,7 +139,9 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
 	auto t_end = std::chrono::system_clock::now();
 	auto t_elapsed = std::chrono::duration_cast<std::chrono::seconds>(t_end - t_start);
 	if (t_elapsed.count() > 5) {
-		printf("frameData timeout error waiting for dataReady \n");
+		#ifdef DEBUG
+        printf("frameData timeout error waiting for dataReady \n");
+        #endif
 		return -1;
 	}
     } 
@@ -153,11 +155,13 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
         }
 
         error = MLX90640_I2CRead(slaveAddr, 0x0400, 832, frameData); 
+        #ifdef DEBUG
         if(error != 0)
         {
             printf("frameData read error \n");
             return error;
         }
+        #endif
 
         error = MLX90640_I2CRead(slaveAddr, 0x8000, 1, &statusRegister);
         if(error != 0)
@@ -168,11 +172,13 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
         cnt = cnt + 1;
     }
 
+    #ifdef DEBUG
     if(cnt > 4)
     {
         fprintf(stderr, "cnt > 4 error \n");
         // return -8;
     }
+    #endif
     //printf("count: %d \n", cnt); 
     error = MLX90640_I2CRead(slaveAddr, 0x800D, 1, &controlRegister1);
     frameData[832] = controlRegister1;
