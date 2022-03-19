@@ -9,6 +9,9 @@ examples = test rawrgb step fbuf interp video hotspot sdlscale
 examples_objects = $(addsuffix .o,$(addprefix $(SRC_DIR), $(examples)))
 examples_output = $(addprefix $(BUILD_DIR), $(examples))
 
+#debugging enabled by default
+CXXFLAGS+=-DDEBUG -g
+
 #PREFIX is environment variable, but if it is not set, then set default value
 ifeq ($(PREFIX),)
 	PREFIX = /usr/local
