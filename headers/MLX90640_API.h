@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#ifndef _MLX90640_API_H_
-#define _MLX90640_API_H_
+#ifndef _MLX640_API_H_
+#define _MLX640_API_H_
 
 #define SCALEALPHA 0.000001
     
@@ -49,10 +49,8 @@ typedef struct
         uint16_t brokenPixels[5];
         uint16_t outlierPixels[5];  
     } paramsMLX90640;
-    
+
     int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
-    int MLX90640_SynchFrame(uint8_t slaveAddr);
-    int MLX90640_TriggerMeasurement(uint8_t slaveAddr);
     int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
     int MLX90640_ExtractParameters(uint16_t *eeData, paramsMLX90640 *mlx90640);
     float MLX90640_GetVdd(uint16_t *frameData, const paramsMLX90640 *params);
@@ -68,5 +66,15 @@ typedef struct
     int MLX90640_SetInterleavedMode(uint8_t slaveAddr);
     int MLX90640_SetChessMode(uint8_t slaveAddr);
     void MLX90640_BadPixelsCorrection(uint16_t *pixels, float *to, int mode, paramsMLX90640 *params);
-    
+
+    int MLX90640_SetDeviceMode(uint8_t slaveAddr, uint8_t deviceMode);
+    int MLX90640_SetSubPageRepeat(uint8_t slaveAddr, uint8_t subPageRepeat);
+    int MLX90640_SetSubPage(uint8_t slaveAddr, uint8_t subPage);
+    int MLX90640_CheckInterrupt(uint8_t slaveAddr);
+    void MLX90640_StartMeasurement(uint8_t slaveAddr, uint8_t subPage);
+    int MLX90640_GetData(uint8_t slaveAddr, uint16_t *frameData);
+    int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
+    int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
+    int MLX90640_InterpolateOutliers(uint16_t *frameData, uint16_t *eepromData);
+
 #endif
