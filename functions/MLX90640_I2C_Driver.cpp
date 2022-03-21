@@ -14,117 +14,97 @@
  * limitations under the License.
  *
  */
-#include "mbed.h"
 #include "MLX90640_I2C_Driver.h"
+#include <iostream>
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <string.h>
+#include <linux/i2c-dev.h>
 
-I2C i2c(p9, p10);
+#define I2C_MSG_FMT char
+#ifndef I2C_FUNC_I2C
+#include <linux/i2c.h>
+#define I2C_MSG_FMT __u8
+#endif
+
+#include <sys/ioctl.h>
+
+int i2c_fd = 0;
+const char *i2c_device = "/dev/i2c-1";
 
 void MLX90640_I2CInit()
-{   
-    i2c.stop();
-}
-
-int MLX90640_I2CGeneralReset(void)
-{    
-    int ack;
-    char cmd[2] = {0,0};
+{
     
-    cmd[0] = 0x00;
-    cmd[1] = 0x06;    
-
-    i2c.stop();
-    wait_us(5);    
-    ack = i2c.write(cmd[0], &cmd[1], 1, 0);
-    
-    if (ack != 0x00)
-    {
-        return -1;
-    }         
-    i2c.stop();   
-    
-    wait_us(50);    
-    
-    return 0;
 }
 
 int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
 {
-    uint8_t sa;                           
-    int ack = 0;                               
-    int cnt = 0;
-    int i = 0;
-    char cmd[2] = {0,0};
-    char i2cData[1664] = {0};
-    uint16_t *p;
-    
-    p = data;
-    sa = (slaveAddr << 1);
-    cmd[0] = startAddress >> 8;
-    cmd[1] = startAddress & 0x00FF;
-    
-    i2c.stop();
-    wait_us(5);    
-    ack = i2c.write(sa, cmd, 2, 1);
-    
-    if (ack != 0x00)
-    {
+    if(!i2c_fd){
+        i2c_fd = open(i2c_device, O_RDWR);
+    }
+
+    int result;
+    char cmd[2] = {(char)(startAddress >> 8), (char)(startAddress & 0xFF)};
+    char buf[1664];
+    uint16_t *p = data;
+    struct i2c_msg i2c_messages[2];
+    struct i2c_rdwr_ioctl_data i2c_messageset[1];
+
+    i2c_messages[0].addr = slaveAddr;
+    i2c_messages[0].flags = 0;
+    i2c_messages[0].len = 2;
+    i2c_messages[0].buf = (I2C_MSG_FMT*)cmd;
+
+    i2c_messages[1].addr = slaveAddr;
+    i2c_messages[1].flags = I2C_M_RD | I2C_M_NOSTART;
+    i2c_messages[1].len = nMemAddressRead * 2;
+    i2c_messages[1].buf = (I2C_MSG_FMT*)buf;
+
+    //result = write(i2c_fd, cmd, 3);    
+    //result = read(i2c_fd, buf, nMemAddressRead*2);
+    i2c_messageset[0].msgs = i2c_messages;
+    i2c_messageset[0].nmsgs = 2;
+
+    memset(buf, 0, nMemAddressRead * 2);
+
+    if (ioctl(i2c_fd, I2C_RDWR, &i2c_messageset) < 0) {
+        printf("I2C Read Error!\n");
         return -1;
     }
-             
-    sa = sa | 0x01;
-    ack = i2c.read(sa, i2cData, 2*nMemAddressRead, 0);
-    
-    if (ack != 0x00)
-    {
-        return -1; 
-    }          
-    i2c.stop();   
-    
-    for(cnt=0; cnt < nMemAddressRead; cnt++)
-    {
-        i = cnt << 1;
-        *p++ = (uint16_t)i2cData[i]*256 + (uint16_t)i2cData[i+1];
+
+    for(int count = 0; count < nMemAddressRead; count++){
+	int i = count << 1;
+    	*p++ = ((uint16_t)buf[i] << 8) | buf[i+1];
     }
-    
-    return 0;   
+
+    return 0;
 } 
 
 void MLX90640_I2CFreqSet(int freq)
 {
-    i2c.frequency(1000*freq);
 }
 
 int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
-{
-    uint8_t sa;
-    int ack = 0;
-    char cmd[4] = {0,0,0,0};
-    static uint16_t dataCheck;
-    
+{ 
+    char cmd[4] = {(char)(writeAddress >> 8), (char)(writeAddress & 0x00FF), (char)(data >> 8), (char)(data & 0x00FF)};
+    int result;
 
-    sa = (slaveAddr << 1);
-    cmd[0] = writeAddress >> 8;
-    cmd[1] = writeAddress & 0x00FF;
-    cmd[2] = data >> 8;
-    cmd[3] = data & 0x00FF;
+    struct i2c_msg i2c_messages[1];
+    struct i2c_rdwr_ioctl_data i2c_messageset[1];
 
-    i2c.stop();
-    wait_us(5);    
-    ack = i2c.write(sa, cmd, 4, 0);
-    
-    if (ack != 0x00)
-    {
+    i2c_messages[0].addr = slaveAddr;
+    i2c_messages[0].flags = 0;
+    i2c_messages[0].len = 4;
+    i2c_messages[0].buf = (I2C_MSG_FMT*)cmd;
+
+    i2c_messageset[0].msgs = i2c_messages;
+    i2c_messageset[0].nmsgs = 1;
+
+    if (ioctl(i2c_fd, I2C_RDWR, &i2c_messageset) < 0) {
+        printf("I2C Write Error!\n");
         return -1;
-    }         
-    i2c.stop();   
-    
-    MLX90640_I2CRead(slaveAddr,writeAddress,1, &dataCheck);
-    
-    if ( dataCheck != data)
-    {
-        return -2;
-    }    
-    
+    }
+
     return 0;
 }
-
