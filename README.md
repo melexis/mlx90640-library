@@ -1,10 +1,24 @@
 # mlx90640-library
-MLX90640 library functions, modified for raspberry pi model 4B.
+## Arthur: [Xiangmin Xu](https://github.com/Maripoforest)
+MLX90640 library, modified for raspberry pi model 4B.
+
+### Prerequisite
 Make sure the LINUX I2C devlib is installed.
 ```
 sudo apt-get install libi2c-dev
 ```
 
-2022.3.28 Update, make all function in class, now can be started with wrapped functions.
-Event Driven finished.
-Xiangmin Xu.
+### How do use:
+```
+mkdir build && cd build
+cmake ..
+make
+../sensor
+```
+This method is based on console output, if you want to use the Qt output, please go to rep [Smart-Light-Bulb-Control-with-Gesture](https://github.com/Maripoforest/Smart-Light-Bulb-Control-with-Gesture.git) and follow the instructions there.
+
+## Update
+2022.3.14 Update, compatible for RPI Model 4B.
+2022.3.28 Update, make all function in class, now can be started with wrapped functions. The whole driver is now event-driven.
+
+2022@[Xiangmin Xu](https://github.com/Maripoforest).
