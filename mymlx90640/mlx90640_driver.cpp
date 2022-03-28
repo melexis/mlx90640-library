@@ -43,7 +43,6 @@
 #define FMT_STRING "\u2588\u2588"
 
 // I2C
-extern bool readd;
 void MLX90640::registerCallback(testpic* pic) {
     mlx90640_callback = pic;
 }
@@ -73,8 +72,8 @@ void MLX90640::MLX90640_I2CInit(void) {
 
     int refresh = MLX90640_GetRefreshRate(MLX_I2C_ADDR);
     std::cout << "EE Dumped...\n";
-    // std::thread sensor(run, pic.pixel);
-    std::thread sensor(exec, this);
+    
+    daqThread = new std::thread(exec, this);
     
 }
 
@@ -82,7 +81,8 @@ void MLX90640::run(){
     int frames = 30;
     int subpage;
     static float mlx90640To[768];
-    while (1){
+    running = 1;
+    while (running){
         state = !state;
         //std::cout << "State: " << state << std::endl;
         MLX90640_GetFrameData(MLX_I2C_ADDR, frame);
@@ -94,54 +94,22 @@ void MLX90640::run(){
         MLX90640_BadPixelsCorrection(this->brokenPixels, mlx90640To, 1, this);
         MLX90640_BadPixelsCorrection(this->outlierPixels, mlx90640To, 1, this);
 
-        std::cout << "Subpage: " << subpage <<std::endl;
-        //MLX90640_SetSubPage(MLX_I2C_ADDR,!subpage);
-        if (!readd) {readd = !readd;}
+        // std::cout << "Subpage: " << subpage <<std::endl;
+        // MLX90640_SetSubPage(MLX_I2C_ADDR,!subpage);
+        
         if (nullptr != mlx90640_callback) {
             mlx90640_callback->hasValue(mlx90640To);
-        }
-        for(int x = 0; x < 32; x++){
-            for(int y = 0; y < 24; y++){
-                //std::cout << image[32 * y + x] << ",";
-                float val = mlx90640To[32 * (23-y) + x];
-                
-                // if(val > 99.99) val = 99.99;
-                // if(val > 32.0){
-                //     //printf(ANSI_COLOR_MAGENTA FMT_STRING ANSI_COLOR_RESET, val);
-                //     std::cout << ANSI_COLOR_MAGENTA << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                // else if(val > 29.0){
-                //     //printf(ANSI_COLOR_RED FMT_STRING ANSI_COLOR_RESET, val);
-                //     std::cout << ANSI_COLOR_RED << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                // else if (val > 26.0){
-                //     //printf(ANSI_COLOR_YELLOW FMT_STRING ANSI_COLOR_YELLOW, val);
-                //     std::cout << ANSI_COLOR_YELLOW << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                // else if ( val > 20.0 ){
-                //     //printf(ANSI_COLOR_NONE FMT_STRING ANSI_COLOR_RESET, val);
-                //     std::cout << ANSI_COLOR_NONE << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                // else if (val > 17.0) {
-                //     //printf(ANSI_COLOR_GREEN FMT_STRING ANSI_COLOR_RESET, val);
-                //     std::cout << ANSI_COLOR_GREEN << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                
-                // else if (val > 10.0) {
-                //     //printf(ANSI_COLOR_CYAN FMT_STRING ANSI_COLOR_RESET, val);
-                //     std::cout << ANSI_COLOR_CYAN << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                // else {
-                //     //printf(ANSI_COLOR_BLUE FMT_STRING ANSI_COLOR_RESET, val);
-                //     std::cout << ANSI_COLOR_BLUE << FMT_STRING ANSI_COLOR_RESET ;
-                // }
-                
-            }
-            std::cout << std::endl;
-        }
-        //std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        std::cout << "\x1b[33A";
+        }   
     }
+}
+
+void MLX90640::stop(void) {
+    running = 0;
+    if (nullptr != daqThread) {
+	    daqThread->join();
+	    delete daqThread;
+	    daqThread = nullptr;
+	}
 }
 
 int MLX90640::MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
