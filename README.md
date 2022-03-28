@@ -10,6 +10,7 @@ sudo apt-get install libi2c-dev
 
 ### How do use:
 ```
+cd mymlx90640
 mkdir build && cd build
 cmake ..
 make
