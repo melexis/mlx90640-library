@@ -1,5 +1,5 @@
 # mlx90640-library
-### Arthur: [Xiangmin Xu](https://github.com/Maripoforest)
+### Arthur: [Xiangmin Xu][Haiyang You](https://github.com/Maripoforest)
 MLX90640 library, modified for raspberry pi model 4B.
 
 ## Prerequisite
