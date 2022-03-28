@@ -1,14 +1,14 @@
 # mlx90640-library
-## Arthur: [Xiangmin Xu](https://github.com/Maripoforest)
+### Arthur: [Xiangmin Xu](https://github.com/Maripoforest)
 MLX90640 library, modified for raspberry pi model 4B.
 
-### Prerequisite
+## Prerequisite
 Make sure the LINUX I2C devlib is installed.
 ```
 sudo apt-get install libi2c-dev
 ```
 
-### How do use:
+## How do use:
 ```
 cd mymlx90640
 mkdir build && cd build
