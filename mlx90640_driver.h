@@ -30,6 +30,7 @@
 #include <string.h>
 #include <linux/i2c-dev.h>
 #include "testpic.h"
+#include "mywidget.h"
 
 #define SCALEALPHA 0.000001
 #define I2C_MSG_FMT char
@@ -53,12 +54,13 @@ public:
     // main funcs
     void run();
     void start();
-    void registerCallback(testpic* pic);
+    void registerCallback(MyWidget* mywidget);
     void stop();
     void MLX90640_I2CInit(void);
     
     // Original driver apis
     int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData);
+    void MLX90640_SetEmissivity(float em);
     int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData);
     int MLX90640_ExtractParameters(uint16_t *eeData, MLX90640 *mlx90640);
     float MLX90640_GetVdd(uint16_t *frameData, const MLX90640 *params);
@@ -107,7 +109,7 @@ private:
     //
     int state;
     float eTa;
-    float emissivity = 1;
+    float emissivity = 0.9;
     uint16_t frame[834];
     static float image[768];
     static uint16_t data[768*sizeof(float)];
@@ -152,7 +154,9 @@ private:
     void MLX90640_I2CFreqSet(int freq);
 
     // exec
-    testpic* mlx90640_callback = nullptr;
+    MyWidget* mlx90640_callback = nullptr;
+    int running = 0;
+    std::thread* daqThread = nullptr;
     static void exec(MLX90640* mlx90640) {
         mlx90640->run();
     }

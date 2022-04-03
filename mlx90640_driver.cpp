@@ -28,14 +28,15 @@
 #include <string.h>
 #include <linux/i2c-dev.h>
 #include <thread>
+#include "mywidget.h"
 #define MLX_I2C_ADDR 0x33
 
 // I2C
-void MLX90640::registerCallback(testpic* pic) {
-    mlx90640_callback = pic;
+void MLX90640::registerCallback(MyWidget* mywidget) {
+    mlx90640_callback = mywidget;
 }
 
-void MLX90640::MLX90640_I2CInit(void) {
+void MLX90640::start() {
     
     state = 0;
     std::cout << "Starting...\n";
@@ -61,6 +62,10 @@ void MLX90640::MLX90640_I2CInit(void) {
     int refresh = MLX90640_GetRefreshRate(MLX_I2C_ADDR);
     std::cout << "EE Dumped...\n";
     
+    if (nullptr != daqThread) {
+        std::cout << "Thread in progress." << std::endl;
+        return;
+    }
     daqThread = new std::thread(exec, this);
     
 }
@@ -196,6 +201,10 @@ void MLX90640::MLX90640_StartMeasurement(uint8_t slaveAddr, uint8_t subPage)
     statusRegister |= 0b0000000000110000; // Set b5: start of measurement
                                           // Set b4: enable RAM overwrite
     MLX90640_I2CWrite(slaveAddr, 0x8000, statusRegister);
+}
+
+void MLX90640::MLX90640_SetEmissivity(float em) {
+    this->emissivity = em;
 }
 
 int MLX90640::MLX90640_GetData(uint8_t slaveAddr, uint16_t *frameData)
