@@ -73,8 +73,6 @@
 
 #define MLX_I2C_ADDR 0x33
 
-#define IMAGE_SCALE 5
-
 // Valid frame rates are 1, 2, 4, 8, 16, 32 and 64
 // The i2c baudrate is set to 1mhz to support these
 #define FPS 16
@@ -135,7 +133,6 @@ int main(int argc, char *argv[]){
     static char image[IMAGE_SIZE];
     static float mlx90640To[768];
     float eTa;
-    static uint16_t data[768*sizeof(float)];
     static int fps = FPS;
     static long frame_time_micros = FRAME_TIME_MICROS;
     char *p;
