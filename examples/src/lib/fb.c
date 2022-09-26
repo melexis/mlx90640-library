@@ -126,7 +126,7 @@ int fb_init(){
               fbfd, 
               0);
 
-    if ((int)fbp == -1) {
+    if (fbp == MAP_FAILED) {
         printf("Failed to mmap.\n");
         return 1;
     }

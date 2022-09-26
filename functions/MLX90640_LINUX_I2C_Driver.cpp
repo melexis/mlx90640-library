@@ -22,7 +22,6 @@
 #include <string.h>
 #include <linux/i2c-dev.h>
 
-#define I2C_MSG_FMT char
 #ifndef I2C_FUNC_I2C
 #include <linux/i2c.h>
 #define I2C_MSG_FMT __u8
@@ -35,7 +34,6 @@ const char *i2c_device = "/dev/i2c-1";
 
 void MLX90640_I2CInit()
 {
-    
 }
 
 int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
@@ -61,7 +59,7 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     i2c_messages[1].len = nMemAddressRead * 2;
     i2c_messages[1].buf = (I2C_MSG_FMT*)buf;
 
-    //result = write(i2c_fd, cmd, 3);    
+    //result = write(i2c_fd, cmd, 3);
     //result = read(i2c_fd, buf, nMemAddressRead*2);
     i2c_messageset[0].msgs = i2c_messages;
     i2c_messageset[0].nmsgs = 2;
@@ -69,9 +67,9 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     memset(buf, 0, nMemAddressRead * 2);
 
     if (ioctl(i2c_fd, I2C_RDWR, &i2c_messageset) < 0) {
-        #ifdef DEBUG
+#ifdef DEBUG
         printf("I2C Read Error!\n");
-        #endif
+#endif
         return -1;
     }
 
@@ -81,14 +79,14 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     }
 
     return 0;
-} 
+}
 
 void MLX90640_I2CFreqSet(int freq)
 {
 }
 
 int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
-{ 
+{
     char cmd[4] = {(char)(writeAddress >> 8), (char)(writeAddress & 0x00FF), (char)(data >> 8), (char)(data & 0x00FF)};
     int result;
 
@@ -104,9 +102,9 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data)
     i2c_messageset[0].nmsgs = 1;
 
     if (ioctl(i2c_fd, I2C_RDWR, &i2c_messageset) < 0) {
-        #ifdef DEBUG
+#ifdef DEBUG
         printf("I2C Write Error!\n");
-        #endif
+#endif
         return -1;
     }
 

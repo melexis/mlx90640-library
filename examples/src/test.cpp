@@ -26,9 +26,7 @@ int main(){
     static uint16_t eeMLX90640[832];
     float emissivity = 1;
     uint16_t frame[834];
-    static float image[768];
     float eTa;
-    static uint16_t data[768*sizeof(float)];
 
     std::fstream fs;
 
@@ -44,9 +42,9 @@ int main(){
     MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
 
     int refresh = MLX90640_GetRefreshRate(MLX_I2C_ADDR);
+    (void)refresh;
     printf("EE Dumped...\n");
 
-    int frames = 30;
     int subpage;
     static float mlx90640To[768];
     while (1){

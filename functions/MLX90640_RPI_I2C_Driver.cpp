@@ -22,16 +22,15 @@ int init = 0;
 
 void MLX90640_I2CInit()
 {
-    
 }
 
 int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data)
 {
     if(!init){
         bcm2835_init();
-    	bcm2835_i2c_begin();
-	bcm2835_i2c_set_baudrate(400000);
-	init = 1;
+        bcm2835_i2c_begin();
+        bcm2835_i2c_set_baudrate(400000);
+        init = 1;
     }
 
     int result;
@@ -47,8 +46,8 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     result = bcm2835_i2c_write_read_rs(cmd, 2, buf, nMemAddressRead*2);
 
     for(int count = 0; count < nMemAddressRead; count++){
-	int i = count << 1;
-    	*p++ = ((uint16_t)buf[i] << 8) | buf[i+1];
+       int i = count << 1;
+        *p++ = ((uint16_t)buf[i] << 8) | buf[i+1];
     }
     return 0;
 } 

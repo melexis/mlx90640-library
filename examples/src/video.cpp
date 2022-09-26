@@ -55,7 +55,7 @@ double video_pts;
 int codec_id = AV_CODEC_ID_H264;
 AVCodec *codec;
 AVCodecContext *c= NULL;
-int i, ret, x, y, got_output;
+int ret, x, y, got_output;
 int write_ret;
 //FILE *f;
 AVFrame *frame;
@@ -140,8 +140,9 @@ static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_
     c->max_b_frames=1;
     c->pix_fmt = AV_PIX_FMT_RGB24;
 
-    if(codec_id == AV_CODEC_ID_H264)
+    if(codec_id == AV_CODEC_ID_H264) {
         av_opt_set(c->priv_data, "preset", "slow", 0);
+	}
 
 	
 	printf("Opening codec...\n");
@@ -181,8 +182,9 @@ static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_
     }
 
     // some formats want stream headers to be separate
-    if(avFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
+    if(avFormatContext->oformat->flags & AVFMT_GLOBALHEADER) {
         c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+	}
 
 	
 	printf("Writing header...\n");
@@ -191,7 +193,11 @@ static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_
 	av_dict_set(&params, "plays", "0", 0);
 	//av_dict_set(&params, "final_delay", 0, 0);
 
-	avformat_write_header(avFormatContext, &params);
+	ret = avformat_write_header(avFormatContext, &params);
+    if (ret < 0) {
+        fprintf(stderr, "Could not write header\n");
+        exit(1);
+    }
 }
 
 void video_encode_frame(int i)
@@ -237,7 +243,7 @@ void video_encode_end()
     av_frame_free(&frame);
 
     /* free the streams */
-    for(i = 0; i < avFormatContext->nb_streams; i++) {
+    for(auto i = 0u; i < avFormatContext->nb_streams; i++) {
         av_freep(&avFormatContext->streams[i]->codec);
         av_freep(&avFormatContext->streams[i]);
     }
@@ -299,10 +305,8 @@ int main(){
 	static uint16_t eeMLX90640[832];
 	float emissivity = 1;
 	uint16_t frame[834];
-	static float image[768];
 	static float mlx90640To[768];
 	float eTa;
-	static uint16_t data[768*sizeof(float)];
 
 	auto frame_time = std::chrono::microseconds(FRAME_TIME_MICROS + OFFSET_MICROS);
 
