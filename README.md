@@ -100,7 +100,7 @@ sudo examples/fbuf
 
 This example uses direct-to-framebuffer rendering and black-blue-green-yellow-red-purple-white false colouring.
 
-If you gave issues with the output image, set "`IMAGE_SCALE`" to a smaller number.
+If you have issues with the output image, set "`IMAGE_SCALE`" to a smaller number.
 
 ## interp
 
