@@ -174,10 +174,8 @@ int main(){
     static uint16_t eeMLX90640[832];
     float emissivity = 1;
     uint16_t frame[834];
-    static float image[768];
     static float mlx90640To[768];
     float eTa;
-    static uint16_t data[768*sizeof(float)];
 
     auto frame_time = std::chrono::microseconds(FRAME_TIME_MICROS + OFFSET_MICROS);
 

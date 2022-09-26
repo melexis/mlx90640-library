@@ -83,6 +83,8 @@ int MLX90640_GetData(uint8_t slaveAddr, uint16_t *frameData)
     
     frameData[832] = controlRegister1;
     frameData[833] = statusRegister & 0x0001; // Populate the subpage number 
+
+    return error;
 }
 
 int MLX90640_InterpolateOutliers(uint16_t *frameData, uint16_t *eepromData)

@@ -37,7 +37,9 @@ libMLX90640_API.a: functions/MLX90640_API.o functions/MLX90640_$(I2C_MODE)_I2C_D
 
 functions/MLX90640_API.o functions/MLX90640_RPI_I2C_Driver.o functions/MLX90640_LINUX_I2C_Driver.o : CXXFLAGS+=-fPIC -I headers -shared $(I2C_LIBS)
 
-$(examples_objects) : CXXFLAGS+=-std=c++11
+# -Wno-deprecated-declarations fixes deprecation warnings affecting LibAV v4.0+ in video.cpp
+# -Wno-format-extra-args ignores the ANSI colour formatting in test.cpp
+$(examples_objects) : CXXFLAGS+=-std=c++11 -Wall -Werror -Wno-format-extra-args -Wno-deprecated-declarations
 
 $(examples_output) : CXXFLAGS+=-I. -std=c++11
 

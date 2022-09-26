@@ -22,7 +22,6 @@
 #include <string.h>
 #include <linux/i2c-dev.h>
 
-#define I2C_MSG_FMT char
 #ifndef I2C_FUNC_I2C
 #include <linux/i2c.h>
 #define I2C_MSG_FMT __u8
