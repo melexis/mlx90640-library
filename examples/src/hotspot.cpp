@@ -103,7 +103,7 @@ void put_digit(int x, int y, int number) {
             col <<= 1;
             put_pixel_scaled(x + n_x, y + n_y, pixel, pixel, pixel);
         }
-    }   
+    }
 }
 
 void put_number(int x, int y, float number) {
@@ -123,13 +123,13 @@ void put_number(int x, int y, float number) {
     }
     while (digits > 0) {
         put_digit(x + o_x, y, number / div);
-        number = fmod(number, div); 
+        number = fmod(number, div);
         div /= 10;
         if (digits == 3){
             put_pixel_scaled(x + o_x + 6, y + 7, 255, 255, 255);
             o_x += 2;
         }
-        digits--;        
+        digits--;
         o_x += 6;
     }
 }
