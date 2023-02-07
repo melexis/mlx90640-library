@@ -1386,22 +1386,24 @@ static int ExtractDeviatingPixels(uint16_t *eeData, paramsMLX90640 *mlx90640)
 
  static int CheckAdjacentPixels(uint16_t pix1, uint16_t pix2)
  {
-     int pixPosDif;
      
-     pixPosDif = pix1 - pix2;
-     if(pixPosDif > -34 && pixPosDif < -30)
-     {
-         return -MLX90640_ADJACENT_BAD_PIXELS_ERROR;
-     } 
+     int pixPosDif;
+     uint16_t lp1 = pix1 >> 5;
+     uint16_t lp2 = pix2 >> 5;
+     uint16_t cp1 = pix1 - (lp1 << 5);
+     uint16_t cp2 = pix2 - (lp2 << 5);
+     
+     pixPosDif = lp1 - lp2;
      if(pixPosDif > -2 && pixPosDif < 2)
      {
-         return -MLX90640_ADJACENT_BAD_PIXELS_ERROR;
+        pixPosDif = cp1 - cp2;
+        if(pixPosDif > -2 && pixPosDif < 2)
+        {
+            return -6;
+        }
+
      } 
-     if(pixPosDif > 30 && pixPosDif < 34)
-     {
-         return -MLX90640_ADJACENT_BAD_PIXELS_ERROR;
-     }
-     
+      
      return 0;    
  }
  
