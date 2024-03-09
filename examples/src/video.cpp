@@ -53,7 +53,13 @@ AVStream *video_avstream; // was *video_st and *st
 // Audio and Video Timestamps (presentation time stamp)
 double video_pts;
 int codec_id = AV_CODEC_ID_H264;
+
+#if LIBAVCODEC_VERSION_MAJOR < 59
 AVCodec *codec;
+#else
+const AVCodec *codec;
+#endif
+
 AVCodecContext *c= NULL;
 int ret, x, y, got_output;
 int write_ret;
@@ -65,13 +71,16 @@ uint8_t endcode[] = { 0, 0, 1, 0xb7 };
 static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_id)
 {
 	// Intialize libavcodec - register all codecs and formats??????????
-    av_register_all();
 
+    // No longer required for ffmpeg 4.0
+#if LIBAVCODEC_VERSION_MAJOR < 59
+    av_register_all();
+#endif
     // auto detect the output format from the name. default is mpeg.
-    avOutputFormat = av_guess_format(NULL, outputfile, NULL);
+    avOutputFormat = (AVOutputFormat *)av_guess_format(NULL, outputfile, NULL);
     if (!avOutputFormat) {
         printf("Could not deduce output format from file extension: using apng.\n");
-        avOutputFormat = av_guess_format("apng", NULL, NULL);
+        avOutputFormat = (AVOutputFormat *)av_guess_format("apng", NULL, NULL);
     }
     if (!avOutputFormat) {
         fprintf(stderr, "Could not find suitable output format\n");
@@ -94,7 +103,11 @@ static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_
 
 	printf("Setting filename...\n");
     // Set the output filename to the outputfile
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
     snprintf(avFormatContext->filename, sizeof(avFormatContext->filename), "%s", outputfile);
+#else
+    snprintf(avFormatContext->url, sizeof(outputfile), "%s", outputfile);
+#endif
 
     /* find the mpeg1 video encoder */
     //codec = avcodec_find_encoder(codec_id);
@@ -114,13 +127,23 @@ static void video_encode_start(const char *outputfile, int fps, AVCodecID codec_
         exit(1);
     }
 
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
     if (video_avstream->codec == NULL) {
+#else
+    if (video_avstream->codecpar == NULL) {
+#endif
 		fprintf(stderr, "AVStream codec is NULL\n");
 		exit(1);
     }
 
     //c = avcodec_alloc_context3(codec);
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
     c = video_avstream->codec;
+#else
+    avcodec_parameters_to_context(c, video_avstream->codecpar);
+#endif
+
     //c->codec_id = avOutputFormat->video_codec;
     if (!c) {
         fprintf(stderr, "Could not allocate video codec context\n");
@@ -209,6 +232,7 @@ void video_encode_frame(int i)
 
     frame->pts = i;
     /* encode the image */
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
     ret = avcodec_encode_video2(c, &pkt, frame, &got_output);
     if (ret < 0) {
         fprintf(stderr, "Error encoding frame\n");
@@ -227,6 +251,30 @@ void video_encode_frame(int i)
 	} else {
 		printf("got_output false: %d", i);
 	}
+#else
+    int result = avcodec_send_frame(c, frame);
+    if (result == AVERROR_EOF)
+      return;
+    else if (result < 0)
+      return;
+    else { 
+      AVPacket* pkt = av_packet_alloc();
+      if (pkt != NULL) {
+        FILE *fp;
+      	fp = fopen( avFormatContext->url, "a+" );
+        while (avcodec_receive_packet(c, pkt) == 0) {
+          fwrite(pkt->data, 1, pkt->size, fp);
+          av_packet_unref(pkt);
+          }
+          av_packet_free(&pkt);
+	  fclose(fp);
+          return;
+        }
+      else {
+        return;
+      }
+    }
+#endif
 }
 
 void video_encode_end()
@@ -244,7 +292,11 @@ void video_encode_end()
 
     /* free the streams */
     for(auto i = 0u; i < avFormatContext->nb_streams; i++) {
-        av_freep(&avFormatContext->streams[i]->codec);
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
+        av_freep(&avFormatContext->streams[i]->codecpar);
+#else
+        av_freep(&avFormatContext->streams[i]->codecpar);
+#endif
         av_freep(&avFormatContext->streams[i]);
     }
 
